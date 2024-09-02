@@ -21,6 +21,7 @@ const MolstarViewer = () => {
         },
         alphafoldView: true,
         bgColor: { r: 255, g: 255, b: 255 },
+        hideControls: true, // Hide all controls
         hideCanvasControls: [
           "selection",
           "animation",
@@ -69,7 +70,7 @@ const MolstarViewer = () => {
 
   return (
     <div>
-      <h3>PDBe Mol* JS Plugin Demo - AlphaFold View</h3>
+      <h3>PDBe Mol* JS Plugin</h3>
       <div
         id="myViewer"
         style={{
