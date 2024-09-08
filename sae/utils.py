@@ -60,7 +60,7 @@ def get_layer_activations(
 
 def train_val_test_split(
     df: pl.DataFrame, train_frac: float = 0.9
-) -> tuple[list[str], list[str], list[str]]:
+) -> tuple[pl.DataFrame, pl.DataFrame, pl.DataFrame]:
     """
     Split the sequences into training, validation, and test sets. train_frac specifies
     the fraction of examples to use for training; the rest is split evenly between
