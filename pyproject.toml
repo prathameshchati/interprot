@@ -18,7 +18,7 @@ requires-python = ">=3.10"
 readme = "README.md"
 
 [tool.setuptools.packages.find]
-where = ["."]
+include = ["plm_interpretability", "plm_interpretability.*"]
 
 [project.urls]
 Homepage = "https://github.com/etowahadams/plm-interpretability"
