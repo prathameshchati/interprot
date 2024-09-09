@@ -20,10 +20,6 @@ readme = "README.md"
 [tool.setuptools]
 packages = ["plm_interpretability"]
 
-[tool.setuptools.packages.find]
-where = ["plm_interpretability"]
-include = ["plm_interpretability", "plm_interpretability.*"]
-
 [project.urls]
 Homepage = "https://github.com/etowahadams/plm-interpretability"
 
