@@ -1,0 +1,42 @@
+[project]
+name = "plm-interpretability"
+version = "0.1.0"
+description = "Mechanistic interpretability tools for protein language models"
+authors = [
+    {name = "Etowah Adams", email = "etowahadams@gmail.com"},
+    {name = "Liam Bai", email = "liambai2000@gmail.com"}
+]
+dependencies = [
+    "transformers",
+    "torch",
+    "polars",
+    "numpy",
+    "scikit-learn",
+    "tqdm",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+
+[tool.setuptools]
+packages = ["plm_interpretability"]
+
+[project.urls]
+Homepage = "https://github.com/etowahadams/plm-interpretability"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
