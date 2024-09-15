@@ -67,7 +67,7 @@ def get_matching_seqs(
         {
             "pdb_id": "foo",
             "sequence": "MVLSE",
-            "class": "00111"
+            "target": "00111"
         }
     ]
     """
@@ -80,16 +80,16 @@ def get_matching_seqs(
             continue
 
         # For each position in the sequence: 0 = no match, 1 = match.
-        class_mask = [0] * len(seq_info["sequence"])
+        target = [0] * len(seq_info["sequence"])
         for match in matches:
             for i in range(match.start(), match.end()):
-                class_mask[i] = 1
+                target[i] = 1
 
         matching_rows.append(
             {
                 "pdb_id": pdb_id,
                 "sequence": seq_info["sequence"],
-                "class": "".join(map(str, class_mask)),
+                "target": "".join(map(str, target)),
             }
         )
         if len(matching_rows) == max_seqs:
@@ -99,7 +99,12 @@ def get_matching_seqs(
 
 
 @click.command
-@click.option("--dssp-path", type=str, required=True, help="Path to the DSSP file")
+@click.option(
+    "--dssp-path",
+    type=click.Path(exists=True),
+    required=True,
+    help="Path to the DSSP file",
+)
 @click.option(
     "--ss-patterns",
     type=str,
@@ -139,7 +144,7 @@ def pdb2labels(dssp_path: str, ss_patterns: list[str], out_path: str, max_seqs: 
     - Annotation: A binary string where 1 indicates the regex matched that position
 
     +----------------+----------------+----------------+
-    | PDB ID         | Sequence       | Class          |
+    | pdb_id         | sequence       | target         |
     +----------------+----------------+----------------+
     | 101M           | MVLSEGEWQL...  | 0001111110...  |
     +----------------+----------------+----------------+
@@ -151,7 +156,7 @@ def pdb2labels(dssp_path: str, ss_patterns: list[str], out_path: str, max_seqs: 
     click.echo(f"Found {len(rows)} matching sequences. Writing to {out_path}...")
 
     with open(out_path, "w") as file:
-        writer = csv.DictWriter(file, fieldnames=["pdb_id", "sequence", "class"])
+        writer = csv.DictWriter(file, fieldnames=["pdb_id", "sequence", "target"])
         writer.writeheader()
         for row in rows:
             writer.writerow(row)

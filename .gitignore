@@ -23,5 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
-data/
+# Python
 __pycache__/
+*.egg-info/
+
+# Directories with large files
+checkpoints/
+data/

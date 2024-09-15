@@ -9,9 +9,9 @@ authors = [
 dependencies = [
     "click",
     "transformers",
-    "torch",
+    "torch>=2.2.0",
     "polars",
-    "numpy",
+    "numpy<2",
     "scikit-learn",
     "tqdm",
 ]
