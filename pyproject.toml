@@ -7,6 +7,7 @@ authors = [
     {name = "Liam Bai", email = "liambai2000@gmail.com"}
 ]
 dependencies = [
+    "click",
     "transformers",
     "torch",
     "polars",
