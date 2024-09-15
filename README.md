@@ -19,5 +19,5 @@ Download a DSSP (Dictionary of Secondary Structure in Proteins) file from [here]
 Use the following command to produce a CSV file matching a desired secondary structure pattern (e.g. beta hairpin: `EEETTTEEEESSS`).
 
 ```bash
-python3 -m plm_interpretability.autointerp pdb2class --dssp-path data/pdb_structure_annotations.txt --ss-patterns EEETTTEEEESSS --out-path data/beta_hairpin_class.csv
+python3 -m plm_interpretability.autointerp pdb2labels --dssp-path data/pdb_structure_annotations.txt --ss-patterns EEETTTEEEESSS --out-path data/beta_hairpin_labels.csv
 ```

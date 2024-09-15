@@ -116,7 +116,7 @@ def get_matching_seqs(
     default=100,
     help="Maximum number of sequences to include in the output",
 )
-def pdb2class(dssp_path: str, ss_patterns: list[str], out_path: str, max_seqs: int):
+def pdb2labels(dssp_path: str, ss_patterns: list[str], out_path: str, max_seqs: int):
     """
     Takes in a DSSP (Dictionary of Secondary Structure in Proteins,
     https://swift.cmbi.umcn.nl/gv/dssp/index.html) file like this:
