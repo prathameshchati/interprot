@@ -139,9 +139,10 @@ def pdb2labels(dssp_file: TextIO, ss_patterns: list[str], out_path: str, max_seq
 
     Applies the regex to the `secstr` string notating secondary structure, and
     filters for matching sequences. Outputs a CSV with columns
-    - PDB ID
-    - Sequence: The amino acid sequence
-    - Annotation: A binary string where 1 indicates the regex matched that position
+    - pdb_id: PDB ID
+    - sequence: The amino acid sequence
+    - target: A binary string where 1 indicates the regex matched that position
+        and 0 otherwise
 
     +----------------+----------------+----------------+
     | pdb_id         | sequence       | target         |
