@@ -11,7 +11,7 @@ from plm_interpretability.sae_model import SparseAutoencoder
 from plm_interpretability.utils import get_layer_activations
 
 
-def compute_z_scores(
+def compute_scores_matrix(
     sequence_target: list[tuple[str, np.ndarray]],
     sequence2latents: Callable[[str], torch.Tensor],
     sae_dim: int,
@@ -19,7 +19,7 @@ def compute_z_scores(
     """
     Given a list of tuples like [(MVLSEGEWQL, 0001111110), ...] and a function
     that can convert a protein sequence to SAE latents, returns a matrix of
-    z-scores like this:
+    scores like this:
 
     +----------------+----------------+----------------+----------------+
     | Sequence       | SAE Dim 1      | SAE Dim 2      | ...            |
@@ -29,11 +29,30 @@ def compute_z_scores(
     | ...            | ...            | ...            | ...            |
     +----------------+----------------+----------------+----------------+
 
-    For each sequence i and SAE latent dimension j, z_scores[i, j] is a
+    For each sequence i and SAE latent dimension j, `scores[i, j]` is a
     measurement of how strongly the activation of SAE latent dim j correlates
     with the target label for sequence i.
+
+    The scoring calculation is as follows. For each sequence, get its SAE latents,
+    a vector of length `sae_dim`.
+    1. Group these latent activations into two bins: positive vs. negative.
+        - positive: activations whose position has the target label 1
+        - negative: activations whose position has the target label 0
+    2. Compute the mean activation for each bin. Let M_pos be the mean
+        activation of the positive bin, and M_neg be the mean activation of
+        the negative bin.
+    3. Let std be the standard deviation across all activations. Compute the
+        score: (M_pos - M_neg) / std.
+
+    This score is similar to the z-score. Intuitively, (M_pos - M_neg) measures
+    how different this SAE latent dim activates at positions that correspond to
+    0 vs. 1. We want to big positive difference because that means the latent dim
+    is activating specifically a positions labeled 1 while not activating at
+    other positions. Dividing by std normalizes the score so that we can be sure
+    that a large (M_pos - M_neg) isn't just a fluke due to a this latent dim
+    having a super wide distribution of activations.
     """
-    z_scores = np.zeros((len(sequence_target), sae_dim))
+    scores = np.zeros((len(sequence_target), sae_dim))
 
     for seq_idx, (sequence, target) in tqdm(
         enumerate(sequence_target),
@@ -43,20 +62,24 @@ def compute_z_scores(
         sae_acts = sequence2latents(sequence)
         for dim_idx in range(sae_dim):
             hidden_dim_acts = sae_acts[:, dim_idx]
+
+            # For most SAE latent dims (all but K), the activations are all 0.
+            # Skip them and let scores default to 0.
             if torch.all(hidden_dim_acts == 0).item():
                 continue
 
             acts_std = hidden_dim_acts.std().item()
 
-            class_1_acts = hidden_dim_acts[target == 1]
-            class_1_acts_mean = class_1_acts.mean().item()
+            positive_acts = hidden_dim_acts[target == 1]
+            positive_acts_mean = positive_acts.mean().item()
 
-            class_0_acts = hidden_dim_acts[target == 0]
-            class_0_acts_mean = class_0_acts.mean().item()
+            negative_acts = hidden_dim_acts[target == 0]
+            negative_acts_mean = negative_acts.mean().item()
 
-            z_score = (class_1_acts_mean - class_0_acts_mean) / acts_std
-            z_scores[seq_idx, dim_idx] = z_score
-    return z_scores
+            score = (positive_acts_mean - negative_acts_mean) / acts_std
+            scores[seq_idx, dim_idx] = score
+
+    return scores
 
 
 @click.command
@@ -145,11 +168,11 @@ def labels2latents(
         sae_acts = sae_acts[1:-1]  # Trim BoS & EoS tokens
         return sae_acts
 
-    z_scores = compute_z_scores(sequence_target, sequence2latents, sae_dim)
+    scores = compute_scores_matrix(sequence_target, sequence2latents, sae_dim)
 
     # Get the mean z-score for each SAE dimension, sort in descending order.
-    mean_z_scores = z_scores.mean(axis=0)
-    sae_dim_scores = [(i, score) for i, score in enumerate(mean_z_scores)]
+    mean_scores = scores.mean(axis=0)
+    sae_dim_scores = [(i, score) for i, score in enumerate(mean_scores)]
     sae_dim_scores.sort(key=lambda x: x[1], reverse=True)
 
     click.echo(f"Mapped activations for {len(sequence_target)} sequences SAE latents.")

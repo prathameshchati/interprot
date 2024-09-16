@@ -19,11 +19,11 @@ Download a DSSP (Dictionary of Secondary Structure in Proteins) file from [here]
 Use the following command to produce a CSV file matching a desired secondary structure pattern (e.g. alpha helix: `H`, beta hairpin: `EEETTTEEEESSS`).
 
 ```bash
-python3 -m plm_interpretability.autointerp pdb2labels --dssp-path plm_interpretability/autointerp/data/pdb_structure_annotations.txt --ss-patterns H --out-path plm_interpretability/autointerp/data/alpha_helix_labels.csv
+python3 -m plm_interpretability.autointerp pdb2labels --dssp-path plm_interpretability/autointerp/data/pdb_structure_annotations.txt --ss-patterns H --out-path plm_interpretability/autointerp/results/alpha_helix_labels.csv
 ```
 
 ### Step 2: Produce a CSV file that scores each SAE dimension on its ability to discriminate against the label
 
 ```bash
-python3 -m plm_interpretability.autointerp labels2latents --labels-csv plm_interpretability/autointerp/data/alpha_helix_labels.csv --sae-checkpoint plm_interpretability/checkpoints/l24_plm1280_sae4096_k128_100k.pt --plm-dim 1280 --plm-layer 24 --sae-dim 4096 --out-path plm_interpretability/autointerp/results/alpha_helix_mappings.csv
+python3 -m plm_interpretability.autointerp labels2latents --labels-csv plm_interpretability/autointerp/results/alpha_helix_labels.csv --sae-checkpoint plm_interpretability/checkpoints/l24_plm1280_sae4096_k128_100k.pt --plm-dim 1280 --plm-layer 24 --sae-dim 4096 --out-path plm_interpretability/autointerp/results/alpha_helix_mappings.csv
 ```
