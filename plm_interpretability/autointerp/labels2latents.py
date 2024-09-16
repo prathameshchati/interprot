@@ -1,5 +1,5 @@
 import csv
-from typing import Callable
+from typing import Callable, TextIO
 
 import click
 import numpy as np
@@ -85,9 +85,9 @@ def compute_scores_matrix(
 @click.command
 @click.option(
     "--labels-csv",
-    type=click.Path(exists=True),
+    type=click.File("r"),
     required=True,
-    help="Path to the CSV file containing sequence labels",
+    help="CSV file containing sequence labels",
 )
 @click.option(
     "--sae-checkpoint",
@@ -108,13 +108,16 @@ def compute_scores_matrix(
     help="Layer of the protein language model to use",
 )
 @click.option(
-    "--out-path", type=str, required=True, help="Path to save the output CSV file"
+    "--out-path",
+    type=click.Path(),
+    required=True,
+    help="Path to save the output CSV file",
 )
 @click.option(
     "--max-seqs", type=int, default=100, help="Maximum number of sequences to process"
 )
 def labels2latents(
-    labels_csv: str,
+    labels_csv: TextIO,
     sae_checkpoint: str,
     plm_dim: int,
     plm_layer: int,
@@ -133,18 +136,17 @@ def labels2latents(
 
     find SAE latents that tend to activate at positions with the 1 label.
     """
-    click.echo(f"Processing {labels_csv}...")
+    click.echo(f"Processing {labels_csv.name}...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     sequence_target = []
-    with open(labels_csv, "r") as f:
-        reader = csv.DictReader(f)
-        for i, row in enumerate(reader):
-            if i >= max_seqs:
-                break
-            sequence = row["sequence"]
-            target = np.array([int(x) for x in row["target"]])
-            sequence_target.append((sequence, target))
+    reader = csv.DictReader(labels_csv)
+    for i, row in enumerate(reader):
+        if i >= max_seqs:
+            break
+        sequence = row["sequence"]
+        target = np.array([int(x) for x in row["target"]])
+        sequence_target.append((sequence, target))
 
     sae_model = SparseAutoencoder(plm_dim, sae_dim).to(device)
     sae_model.load_state_dict(torch.load(sae_checkpoint, map_location=device))
@@ -170,7 +172,7 @@ def labels2latents(
 
     scores = compute_scores_matrix(sequence_target, sequence2latents, sae_dim)
 
-    # Get the mean z-score for each SAE dimension, sort in descending order.
+    # Get the mean score for each SAE dimension, sort in descending order.
     mean_scores = scores.mean(axis=0)
     sae_dim_scores = [(i, score) for i, score in enumerate(mean_scores)]
     sae_dim_scores.sort(key=lambda x: x[1], reverse=True)
@@ -180,5 +182,5 @@ def labels2latents(
 
     with open(out_path, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["sae_dim", "z_score"])
+        writer.writerow(["sae_dim", "score"])
         writer.writerows(sae_dim_scores)

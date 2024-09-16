@@ -1,10 +1,11 @@
 import csv
 import re
+from typing import TextIO
 
 import click
 
 
-def parse_dssp_file(dssp_path: str) -> dict[str, dict[str, str]]:
+def parse_dssp_file(dssp_file: TextIO) -> dict[str, dict[str, str]]:
     """
     Parses a DSSP file returns a dictionary like
     {
@@ -17,8 +18,7 @@ def parse_dssp_file(dssp_path: str) -> dict[str, dict[str, str]]:
     where the keys are the PDB ID and the value contains the sequence and secstr
     strings for each PDB entry.
     """
-    with open(dssp_path, "r") as file:
-        data = file.readlines()
+    data = dssp_file.readlines()
 
     # Start with the first sequence and initialize all variables: a `reading_seq`
     # bool keeps track of whether we're reading a `sequence` line or a `secstr`
@@ -100,8 +100,8 @@ def get_matching_seqs(
 
 @click.command
 @click.option(
-    "--dssp-path",
-    type=click.Path(exists=True),
+    "--dssp-file",
+    type=click.File(mode="r"),
     required=True,
     help="Path to the DSSP file",
 )
@@ -121,7 +121,7 @@ def get_matching_seqs(
     default=100,
     help="Maximum number of sequences to include in the output",
 )
-def pdb2labels(dssp_path: str, ss_patterns: list[str], out_path: str, max_seqs: int):
+def pdb2labels(dssp_file: TextIO, ss_patterns: list[str], out_path: str, max_seqs: int):
     """
     Takes in a DSSP (Dictionary of Secondary Structure in Proteins,
     https://swift.cmbi.umcn.nl/gv/dssp/index.html) file like this:
@@ -149,8 +149,8 @@ def pdb2labels(dssp_path: str, ss_patterns: list[str], out_path: str, max_seqs: 
     | 101M           | MVLSEGEWQL...  | 0001111110...  |
     +----------------+----------------+----------------+
     """
-    click.echo(f"Processing {dssp_path}...")
-    seqs_dict = parse_dssp_file(dssp_path)
+    click.echo(f"Processing {dssp_file.name}...")
+    seqs_dict = parse_dssp_file(dssp_file)
 
     rows = get_matching_seqs(seqs_dict, ss_patterns, max_seqs)
     click.echo(f"Found {len(rows)} matching sequences. Writing to {out_path}...")
