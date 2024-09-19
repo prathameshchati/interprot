@@ -16,7 +16,7 @@ const MolstarViewer = () => {
 
       const options = {
         customData: {
-          url: "https://alphafold.ebi.ac.uk/files/AF-O15552-F1-model_v1.cif",
+          url: "https://alphafold.ebi.ac.uk/files/AF-A0PK11-F1-model_v4.cif",
           format: "cif",
         },
         alphafoldView: true,
