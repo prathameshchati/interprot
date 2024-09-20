@@ -1,4 +1,5 @@
 import csv
+import math
 from typing import Callable, TextIO
 
 import click
@@ -38,19 +39,14 @@ def compute_scores_matrix(
     1. Group these latent activations into two bins: positive vs. negative.
         - positive: activations whose position has the target label 1
         - negative: activations whose position has the target label 0
-    2. Compute the mean activation for each bin. Let M_pos be the mean
-        activation of the positive bin, and M_neg be the mean activation of
-        the negative bin.
-    3. Let std be the standard deviation across all activations. Compute the
-        score: (M_pos - M_neg) / std.
+    2. Do a 2-sample t-test to see if the mean activation of the positive bin is
+       statistically different from the mean activation of the negative bin.
 
-    This score is similar to the z-score. Intuitively, (M_pos - M_neg) measures
-    how different this SAE latent dim activates at positions that correspond to
-    0 vs. 1. We want to big positive difference because that means the latent dim
-    is activating specifically a positions labeled 1 while not activating at
-    other positions. Dividing by std normalizes the score so that we can be sure
-    that a large (M_pos - M_neg) isn't just a fluke due to a this latent dim
-    having a super wide distribution of activations.
+       t = (mean1 - mean0) / sqrt((var1/n1) + (var0/n0))
+
+       Where:
+       - mean1, var1, n1 are the mean, variance, and sample size of group 1
+       - mean0, var0, n0 are the mean, variance, and sample size of group 0
     """
     scores = np.zeros((len(sequence_target), sae_dim))
 
@@ -68,15 +64,18 @@ def compute_scores_matrix(
             if torch.all(hidden_dim_acts == 0).item():
                 continue
 
-            acts_std = hidden_dim_acts.std().item()
-
             positive_acts = hidden_dim_acts[target == 1]
             positive_acts_mean = positive_acts.mean().item()
+            positive_acts_var = positive_acts.var().item()
 
             negative_acts = hidden_dim_acts[target == 0]
             negative_acts_mean = negative_acts.mean().item()
+            negative_acts_var = negative_acts.var().item()
 
-            score = (positive_acts_mean - negative_acts_mean) / acts_std
+            score = (positive_acts_mean - negative_acts_mean) / math.sqrt(
+                positive_acts_var / len(positive_acts)
+                + negative_acts_var / len(negative_acts)
+            )
             scores[seq_idx, dim_idx] = score
 
     return scores
