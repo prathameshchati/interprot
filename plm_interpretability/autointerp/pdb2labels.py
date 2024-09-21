@@ -1,8 +1,10 @@
 import csv
 import re
+from difflib import SequenceMatcher
 from typing import TextIO
 
 import click
+from tqdm import tqdm
 
 
 def parse_dssp_file(dssp_file: TextIO) -> dict[str, dict[str, str]]:
@@ -51,7 +53,10 @@ def parse_dssp_file(dssp_file: TextIO) -> dict[str, dict[str, str]]:
 
 
 def get_matching_seqs(
-    seqs_dict: dict[str, dict[str, str]], ss_patterns: list[str], max_seqs: int
+    seqs_dict: dict[str, dict[str, str]],
+    ss_patterns: list[str],
+    max_seqs: int,
+    max_similarity: float,
 ) -> list[dict[str, str]]:
     """
     Given the output of `parse_dssp_file` along with a list of secondary structure
@@ -71,16 +76,39 @@ def get_matching_seqs(
         }
     ]
     """
-    matching_rows = []
+    matching_rows: list[dict[str, str]] = []
+
+    progress = tqdm(total=max_seqs)
     for pdb_id, seq_info in seqs_dict.items():
+        curr_seq = seq_info["sequence"]
+
         matches = []
         for pattern in ss_patterns:
             matches.extend(list(re.finditer(pattern, seq_info["secstr"])))
         if len(matches) == 0:
             continue
 
+        # Filter out sequences that have high similarity to existing sequences.
+        # This is comparing each new sequence to all existing sequences and is
+        # quite slow.
+        has_similar_seq = False
+        for row in matching_rows[::-1]:
+            existing_seq = row["sequence"]
+            sm = SequenceMatcher(a=existing_seq, b=curr_seq)
+
+            # .quick_ratio() gives an upper bound quickly. If it's lower than
+            # max_similarity, this sequence is definitely OK.
+            if sm.quick_ratio() < max_similarity:
+                continue
+            if sm.ratio() > max_similarity:
+                has_similar_seq = True
+                break
+
+        if has_similar_seq:
+            continue
+
         # For each position in the sequence: 0 = no match, 1 = match.
-        target = [0] * len(seq_info["sequence"])
+        target = [0] * len(curr_seq)
         for match in matches:
             for i in range(match.start(), match.end()):
                 target[i] = 1
@@ -92,6 +120,7 @@ def get_matching_seqs(
                 "target": "".join(map(str, target)),
             }
         )
+        progress.update(1)
         if len(matching_rows) == max_seqs:
             break
 
@@ -121,7 +150,19 @@ def get_matching_seqs(
     default=100,
     help="Maximum number of sequences to include in the output",
 )
-def pdb2labels(dssp_file: TextIO, ss_patterns: list[str], out_path: str, max_seqs: int):
+@click.option(
+    "--max-similarity",
+    type=float,
+    default=0.8,
+    help="Maximum similarity between sequences to be included in the output",
+)
+def pdb2labels(
+    dssp_file: TextIO,
+    ss_patterns: list[str],
+    out_path: str,
+    max_seqs: int,
+    max_similarity: float,
+):
     """
     Takes in a DSSP (Dictionary of Secondary Structure in Proteins,
     https://swift.cmbi.umcn.nl/gv/dssp/index.html) file like this:
@@ -153,7 +194,7 @@ def pdb2labels(dssp_file: TextIO, ss_patterns: list[str], out_path: str, max_seq
     click.echo(f"Processing {dssp_file.name}...")
     seqs_dict = parse_dssp_file(dssp_file)
 
-    rows = get_matching_seqs(seqs_dict, ss_patterns, max_seqs)
+    rows = get_matching_seqs(seqs_dict, ss_patterns, max_seqs, max_similarity)
     click.echo(f"Found {len(rows)} matching sequences. Writing to {out_path}...")
 
     with open(out_path, "w") as file:
