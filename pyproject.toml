@@ -19,7 +19,7 @@ requires-python = ">=3.10"
 readme = "README.md"
 
 [tool.setuptools]
-packages = ["plm_interpretability"]
+packages = ["plm_interpretability", "plm_interpretability.autointerp"]
 
 [project.scripts]
 autointerp = "plm_interpretability.autointerp.__main__:cli"
