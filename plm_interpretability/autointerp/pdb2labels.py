@@ -90,7 +90,7 @@ def get_matching_seqs(
 
         # Filter out sequences that have high similarity to existing sequences.
         # This is comparing each new sequence to all existing sequences and is
-        # quite slow.
+        # quite slow when there are more than a few hundred sequences.
         has_similar_seq = False
         for row in matching_rows[::-1]:
             existing_seq = row["sequence"]

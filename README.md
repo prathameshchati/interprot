@@ -16,7 +16,7 @@ pnpm run dev
 
 ```bash
 docker compose build
-docker compose run --rm plm_interpretability bash
+docker compose run --rm plm-interpretability bash
 ```
 
 ### Step 1: Produce a labels CSV file
@@ -27,11 +27,11 @@ Use the following command to produce a CSV file matching a desired secondary str
 by the regex `E{3,12}[T]{2,5}E{3,12}`.
 
 ```bash
-python3 -m plm_interpretability.autointerp pdb2labels --dssp-file plm_interpretability/autointerp/data/ss.txt --ss-patterns "E{3,12}[T]{2,5}E{3,12}" --out-path "plm_interpretability/autointerp/results/labels/E{3,12}[T]{2,5}E{3,12}_labels.csv"
+autointerp pdb2labels --dssp-file plm_interpretability/autointerp/data/ss.txt --ss-patterns "E{3,12}[T]{2,5}E{3,12}" --out-path "plm_interpretability/autointerp/results/labels/E{3,12}[T]{2,5}E{3,12}_labels.csv"
 ```
 
 ### Step 2: Produce a CSV file that scores each SAE dimension on its ability to discriminate against the label
 
 ```bash
-python3 -m plm_interpretability.autointerp labels2latents --labels-csv "plm_interpretability/autointerp/results/labels/E{3,12}[T]{2,5}E{3,12}_labels.csv" --sae-checkpoint plm_interpretability/checkpoints/l24_plm1280_sae4096_k128_211k.pt --plm-dim 1280 --plm-layer 24 --sae-dim 4096 --out-path "plm_interpretability/autointerp/results/l24_plm1280_sae4096_k128_211k/E{3,12}[T]{2,5}E{3,12}_mapping.csv"
+autointerp labels2latents --labels-csv "plm_interpretability/autointerp/results/labels/E{3,12}[T]{2,5}E{3,12}_labels.csv" --sae-checkpoint plm_interpretability/checkpoints/l24_plm1280_sae4096_k128_211k.pt --plm-dim 1280 --plm-layer 24 --sae-dim 4096 --out-path "plm_interpretability/autointerp/results/l24_plm1280_sae4096_k128_211k/E{3,12}[T]{2,5}E{3,12}_mapping.csv"
 ```

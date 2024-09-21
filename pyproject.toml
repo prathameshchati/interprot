@@ -21,6 +21,9 @@ readme = "README.md"
 [tool.setuptools]
 packages = ["plm_interpretability"]
 
+[project.scripts]
+autointerp = "plm_interpretability.autointerp.__main__:cli"
+
 [project.urls]
 Homepage = "https://github.com/etowahadams/plm-interpretability"
 
