@@ -137,6 +137,7 @@ def labels2latents(
     """
     click.echo(f"Processing {labels_csv.name}...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    click.echo(f"Using device: {device}")
 
     sequence_target = []
     reader = csv.DictReader(labels_csv)
