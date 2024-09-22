@@ -7,10 +7,11 @@ authors = [
     {name = "Liam Bai", email = "liambai2000@gmail.com"}
 ]
 dependencies = [
+    "click",
     "transformers",
-    "torch",
+    "torch>=2.2.0",
     "polars",
-    "numpy",
+    "numpy<2",
     "scikit-learn",
     "tqdm",
 ]
@@ -18,7 +19,10 @@ requires-python = ">=3.10"
 readme = "README.md"
 
 [tool.setuptools]
-packages = ["plm_interpretability"]
+packages = ["plm_interpretability", "plm_interpretability.autointerp"]
+
+[project.scripts]
+autointerp = "plm_interpretability.autointerp.__main__:cli"
 
 [project.urls]
 Homepage = "https://github.com/etowahadams/plm-interpretability"
