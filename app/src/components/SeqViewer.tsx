@@ -75,6 +75,7 @@ const SeqViewer: React.FC<SeqViewerProps> = ({ seq }) => {
 
   return (
     <div>
+      {seq.alphafold_id}{" "}
       {seq.tokens_list.map((token, index) => {
         const color = redColorMap(seq.tokens_acts_list[index], maxValue);
         return (
