@@ -37,7 +37,12 @@ function App() {
         <h1 className="text-3xl font-bold">{data[feature].dimenstion}</h1>
         <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
           {data[feature].examples.map((seq) => (
-            <SeqViewer seq={seq} />
+            <MolstarViewer key={`molstar-${seq.alphafold_id}`} alphafold_id={seq.alphafold_id} activation_list={seq.tokens_acts_list} />
+          ))}
+        </div>
+        <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
+          {data[feature].examples.map((seq) => (
+            <SeqViewer key={`seq-${seq.alphafold_id}`} seq={seq} />
           ))}
         </div>
       </div>

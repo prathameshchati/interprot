@@ -6,12 +6,14 @@ interface MolstarViewerProps {
   activation_list: Array<number>;
 }
 
+// PDBeMolstarPlugin doesn't allow color in rgb format
 function rgbToHex(rgb: string): string {
   const [r, g, b] = rgb.match(/\d+/g)!.map(Number);
   const hex = ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
   return `#${hex}`;
 }
 
+// Generates the "color" data given the activation list
 function residueColor(activation_list: Array<number>) {
   const max_activation = Math.max(...activation_list);
   console.warn("max_activation", max_activation);
@@ -54,14 +56,14 @@ const MolstarViewer = ({
       const viewerContainer = document.getElementById(`viewer-${alphafold_id}`);
       viewerInstance.render(viewerContainer, options);
 
-      // Color residues in the viewer
+      // Since we can't color the residues immediately, we'll wait for 3 seconds
+      // TODO: figure out how to listen to when the structure is loaded
       setTimeout(() => {
-        console.warn(residueColor(activation_list));
         viewerInstance.visual.select({
           data: residueColor(activation_list),
           nonSelectedColor: "#ffffff",
         });
-      }, 5000);
+      }, 3000);
     };
 
     // Check if the script is already loaded
@@ -89,9 +91,7 @@ const MolstarViewer = ({
   }, [alphafold_id, activation_list]);
 
   return (
-    <div>
-      <h3>PDBe Mol* JS Plugin</h3>
-      <div
+    <div
         id={`viewer-${alphafold_id}`}
         style={{
           float: "left",
@@ -101,7 +101,6 @@ const MolstarViewer = ({
           margin: "20px",
         }}
       ></div>
-    </div>
   );
 };
 

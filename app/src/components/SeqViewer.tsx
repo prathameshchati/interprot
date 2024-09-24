@@ -77,8 +77,6 @@ const SeqViewer: React.FC<SeqViewerProps> = ({ seq }) => {
 
   return (
     <div>
-      <MolstarViewer alphafold_id={seq.alphafold_id} activation_list={seq.tokens_acts_list} />
-      {seq.alphafold_id}{" "}
       {seq.tokens_list.map((token, index) => {
         const color = redColorMap(seq.tokens_acts_list[index], maxValue);
         return (
