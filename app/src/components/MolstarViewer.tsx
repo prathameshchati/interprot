@@ -2,8 +2,33 @@
 // generated from this example https://embed.plnkr.co/plunk/JsL8TzofFtKq0ZV4
 
 import { useEffect } from "react";
+import { redColorMap } from "./SeqViewer";
+interface MolstarViewerProps {
+  alphafold_id: string;
+  activation_list: Array<number>;
+}
 
-const MolstarViewer = () => {
+function rgbToHex(rgb: string): string {
+  const [r, g, b] = rgb.match(/\d+/g)!.map(Number);
+  const hex = ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
+  return `#${hex}`;
+}
+
+function residueColor(activation_list: Array<number>) {
+  const max_activation = Math.max(...activation_list);
+  console.warn("max_activation", max_activation);
+
+  return activation_list.map((activation, i) => ({
+    struct_asym_id: "A",
+    residue_number: i + 1,
+    color: rgbToHex(redColorMap(activation, max_activation)),
+  }));
+}
+
+const MolstarViewer = ({
+  alphafold_id,
+  activation_list,
+}: MolstarViewerProps) => {
   useEffect(() => {
     // Dynamically load the Molstar script
     const script = document.createElement("script");
@@ -16,7 +41,7 @@ const MolstarViewer = () => {
 
       const options = {
         customData: {
-          url: "https://alphafold.ebi.ac.uk/files/AF-A0PK11-F1-model_v4.cif",
+          url: `https://alphafold.ebi.ac.uk/files/AF-${alphafold_id}-F1-model_v4.cif`,
           format: "cif",
         },
         alphafoldView: true,
@@ -32,33 +57,19 @@ const MolstarViewer = () => {
         landscape: true,
       };
 
-      const viewerContainer = document.getElementById("myViewer");
+      const viewerContainer = document.getElementById(`viewer-${alphafold_id}`);
       viewerInstance.render(viewerContainer, options);
 
       // Color resides in the viewer
       // https://github.com/molstar/pdbe-molstar/issues/90#issuecomment-2317239229
       // Needs to be wrapped in a setTimeout to ensure the viewer is ready
       setTimeout(() => {
+        console.warn(residueColor(activation_list));
         viewerInstance.visual.select({
-          data: [
-            { struct_asym_id: "A", residue_number: 1, color: "#ff0000" },
-            { struct_asym_id: "A", residue_number: 2, color: "#ff8800" },
-            {
-              struct_asym_id: "A",
-              start_residue_number: 3,
-              end_residue_number: 6,
-              color: "#ffff00",
-            },
-            {
-              struct_asym_id: "A",
-              start_residue_number: 15,
-              end_residue_number: 20,
-              color: "#88ff00",
-            },
-          ],
+          data: residueColor(activation_list),
           nonSelectedColor: "#ffffff",
         });
-      }, 500);
+      }, 5000);
     };
     document.body.appendChild(script);
 
@@ -72,7 +83,7 @@ const MolstarViewer = () => {
     <div>
       <h3>PDBe Mol* JS Plugin</h3>
       <div
-        id="myViewer"
+        id={`viewer-${alphafold_id}`}
         style={{
           float: "left",
           width: "700px",
