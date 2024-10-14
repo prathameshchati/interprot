@@ -347,7 +347,10 @@ def latent_probe(
                 res_rows = []
                 for dim in tqdm(
                     range(sae_dim),
-                    desc="Logistic regression on each latent dimension",
+                    desc=(
+                        "Logistic regression on each latent dimension for "
+                        f"{annotation.name}: {class_name}"
+                    ),
                 ):
                     model = LogisticRegression(class_weight="balanced")
                     X_train = [[e["sae_acts"][dim]] for e in train_examples]
