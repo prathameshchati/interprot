@@ -12,6 +12,7 @@ import torch
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
+from tqdm import tqdm
 from transformers import AutoTokenizer, EsmModel
 
 from plm_interpretability.sae_model import SparseAutoencoder
@@ -163,7 +164,10 @@ def make_examples_from_annotation_entries(
     """
     examples = []
     num_positive_examples = 0
-    for seq, entries in seq_to_annotation_entries.items():
+    for seq, entries in tqdm(
+        seq_to_annotation_entries.items(),
+        desc="Running ESM -> SAE inference",
+    ):
         positive_positions = set()
         for e in entries:
             for i in range(e["start"] - 1, e["end"]):  # Swissprot is 1-indexed
