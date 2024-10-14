@@ -1,7 +1,11 @@
 import unittest
 from unittest.mock import Mock, patch
 
+import pandas as pd
+
 from plm_interpretability.latent_probe.__main__ import (
+    ResidueAnnotation,
+    get_annotation_entries_for_class,
     make_examples_from_annotation_entries,
 )
 
@@ -78,3 +82,55 @@ class TestLatentProbe(unittest.TestCase):
             sae_model=mock_sae_model,
             plm_layer=24,
         )
+
+    def test_get_annotation_entries_for_class(self):
+        mock_df = pd.DataFrame(
+            {
+                "Sequence": ["ABCDEF", "GHIJKL", "MNOPQR"],
+                "DNA binding": [
+                    'DNA_BIND 1..3; /note="H-T-H motif"',
+                    'DNA_BIND 2..4; /note="Homeobox"',
+                    'DNA_BIND 1..6; /note="Nuclear receptor"',
+                ],
+            }
+        )
+
+        annotation = ResidueAnnotation(
+            name="DNA binding",
+            swissprot_header="DNA_BIND",
+            class_names=["H-T-H motif", "Homeobox", "Nuclear receptor"],
+        )
+
+        result = get_annotation_entries_for_class(
+            mock_df, annotation, "H-T-H motif", max_seqs_per_task=10
+        )
+        self.assertEqual(len(result), 1)
+        self.assertIn("ABCDEF", result)
+        self.assertEqual(
+            result["ABCDEF"], [{"start": 1, "end": 3, "note": "H-T-H motif"}]
+        )
+
+        result = get_annotation_entries_for_class(
+            mock_df, annotation, "Homeobox", max_seqs_per_task=10
+        )
+        self.assertEqual(len(result), 1)
+        self.assertIn("GHIJKL", result)
+        self.assertEqual(result["GHIJKL"], [{"start": 2, "end": 4, "note": "Homeobox"}])
+
+        result = get_annotation_entries_for_class(
+            mock_df, annotation, ResidueAnnotation.ALL_CLASSES, max_seqs_per_task=10
+        )
+        self.assertEqual(len(result), 3)
+        self.assertIn("ABCDEF", result)
+        self.assertIn("GHIJKL", result)
+        self.assertIn("MNOPQR", result)
+
+        result = get_annotation_entries_for_class(
+            mock_df, annotation, ResidueAnnotation.ALL_CLASSES, max_seqs_per_task=2
+        )
+        self.assertEqual(len(result), 2)
+
+        result = get_annotation_entries_for_class(
+            mock_df, annotation, "Non-existent", max_seqs_per_task=10
+        )
+        self.assertEqual(len(result), 0)
