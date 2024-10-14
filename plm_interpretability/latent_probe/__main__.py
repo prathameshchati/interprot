@@ -69,9 +69,37 @@ RESIDUE_ANNOTATIONS = [
         ],
     ),
     ResidueAnnotation(
+        name="Domain [FT]",
+        swissprot_header="DOMAIN",
+        values=[
+            "Protein kinase",
+            "tr-type G",
+            "Radical SAM core",
+            "ABC transporter",
+            "Helicase ATP-binding",
+            "Glutamine amidotransferase type-1" "ATP-grasp",
+            "S4 RNA-binding",
+        ],
+    ),
+    ResidueAnnotation(
+        name="Active site",
+        swissprot_header="ACT_SITE",
+        values=[
+            "Proton acceptor",
+            "Proton donor",
+            "Nucleophile",
+            "Charge relay system",
+        ],
+    ),
+    ResidueAnnotation(
         name="Signal peptide",
         swissprot_header="SIGNAL",
         values=[ResidueAnnotation.ALL],
+    ),
+    ResidueAnnotation(
+        name="Transit peptide",
+        swissprot_header="TRANSIT",
+        values=[ResidueAnnotation.ALL, "Mitochondrion", "Chloroplast"],
     ),
 ]
 
@@ -190,7 +218,7 @@ def latent_probe(
 
             if len(seq_to_annotation_entries) > max_seqs_per_task:
                 logger.warning(
-                    f"Since max_seqs_per_task={max_seqs_per_task}, sing a random "
+                    f"Since max_seqs_per_task={max_seqs_per_task}, using a random "
                     f"sample of {max_seqs_per_task} sequences."
                 )
                 subset_seqs = random.sample(
