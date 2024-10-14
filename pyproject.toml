@@ -20,7 +20,7 @@ requires-python = ">=3.10"
 readme = "README.md"
 
 [tool.setuptools]
-packages = ["plm_interpretability", "plm_interpretability.autointerp"]
+packages = ["plm_interpretability", "plm_interpretability.autointerp", "plm_interpretability.latent_probe"]
 
 [project.scripts]
 autointerp = "plm_interpretability.autointerp.__main__:cli"
