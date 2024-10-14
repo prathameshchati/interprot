@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 
 import click
+import numpy as np
 import pandas as pd
 import torch
 from sklearn.linear_model import LogisticRegression
@@ -112,13 +113,13 @@ def get_sae_acts(
     plm_model: EsmModel,
     sae_model: SparseAutoencoder,
     plm_layer: int,
-):
+) -> np.ndarray[float]:
     esm_layer_acts = get_layer_activations(
         tokenizer=tokenizer, plm=plm_model, seqs=[seq], layer=plm_layer
     )[0]
     sae_acts = sae_model.get_acts(esm_layer_acts)[1:-1]  # Trim BOS and EOS tokens
     assert sae_acts.shape[0] == len(seq)
-    return sae_acts
+    return sae_acts.cpu().numpy()
 
 
 def make_examples_from_annotation_entries(
