@@ -121,6 +121,75 @@ def get_sae_acts(
     return sae_acts
 
 
+def make_examples_from_annotation_entries(
+    seq_to_annotation_entries: dict[str, list[dict]],
+    tokenizer: AutoTokenizer,
+    plm_model: EsmModel,
+    sae_model: SparseAutoencoder,
+    plm_layer: int,
+):
+    """
+    Given a dict like this:
+    ```
+    {
+        "AAA": [
+            {"start": 1, "end": 24},
+            {"start": 100, "end": 120},
+        ],
+        ...
+    }
+    ```
+    Create an example for each residue in each sequence where:
+
+    Input: SAE activation at the residue position
+    Target: Boolean indicating whether the residue is annotated with
+    the label, e.g. whether it falls within the motif labeled "H-T-H motif".
+
+    Returns a list of dicts like:
+    ```
+    [
+        {
+            "sae_acts": [0.1, 0.2, 0.3, ...], # A number for each hidden dim
+            "target": True,
+        },
+        {
+            "sae_acts": [0.4, 0.5, 0.6, ...],
+            "target": False,
+        },
+        ...
+    ]
+    ```
+    """
+    examples = []
+    num_positive_examples = 0
+    for seq, entries in seq_to_annotation_entries.items():
+        positive_positions = set()
+        for e in entries:
+            for i in range(e["start"] - 1, e["end"]):  # Swissprot is 1-indexed
+                positive_positions.add(i)
+
+        sae_acts = get_sae_acts(
+            seq=seq,
+            tokenizer=tokenizer,
+            plm_model=plm_model,
+            sae_model=sae_model,
+            plm_layer=plm_layer,
+        )
+
+        for i, pos_sae_acts in enumerate(sae_acts):
+            examples.append(
+                {
+                    "sae_acts": pos_sae_acts,
+                    "target": i in positive_positions,
+                }
+            )
+            if i in positive_positions:
+                num_positive_examples += 1
+
+    logger.info(f"{num_positive_examples}/{len(examples)} positive/total examples")
+    return examples
+
+
 @click.command()
 @click.option(
     "--sae-checkpoint",
@@ -231,38 +300,12 @@ def latent_probe(
                     if seq in subset_seqs
                 }
 
-            # Then, create 1 example for each residue in each sequence.
-            # Input: SAE activation at the residue position
-            # Target: Boolean indication whether the residue is annotated with
-            # the label, e.g. whether it falls within motif labeled "H-T-H motif".
-            examples = []
-            num_positive_examples = 0
-            for seq, entries in seq_to_annotation_entries.items():
-                positive_positions = set()
-                for e in entries:
-                    for i in range(e["start"] - 1, e["end"]):  # Swissprot is 1-indexed
-                        positive_positions.add(i)
-
-                sae_acts = get_sae_acts(
-                    seq=seq,
-                    tokenizer=tokenizer,
-                    plm_model=plm_model,
-                    sae_model=sae_model,
-                    plm_layer=plm_layer,
-                )
-
-                for i, pos_sae_acts in enumerate(sae_acts):
-                    examples.append(
-                        {
-                            "sae_acts": pos_sae_acts,
-                            "target": i in positive_positions,
-                        }
-                    )
-                    if i in positive_positions:
-                        num_positive_examples += 1
-
-            logger.info(
-                f"{num_positive_examples}/{len(examples)} positive/total examples"
+            examples = make_examples_from_annotation_entries(
+                seq_to_annotation_entries=seq_to_annotation_entries,
+                tokenizer=tokenizer,
+                plm_model=plm_model,
+                sae_model=sae_model,
+                plm_layer=plm_layer,
             )
 
             train_examples, test_examples = train_test_split(
