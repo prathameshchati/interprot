@@ -37,6 +37,7 @@ networkx==3.3
     # via torch
 numpy==1.26.4
     # via
+    #   pandas
     #   plm-interpretability (pyproject.toml)
     #   scikit-learn
     #   scipy
@@ -45,8 +46,14 @@ packaging==24.1
     # via
     #   huggingface-hub
     #   transformers
+pandas==2.2.3
+    # via plm-interpretability (pyproject.toml)
 polars==1.7.1
     # via plm-interpretability (pyproject.toml)
+python-dateutil==2.9.0.post0
+    # via pandas
+pytz==2024.2
+    # via pandas
 pyyaml==6.0.2
     # via
     #   huggingface-hub
@@ -63,6 +70,8 @@ scikit-learn==1.5.2
     # via plm-interpretability (pyproject.toml)
 scipy==1.14.1
     # via scikit-learn
+six==1.16.0
+    # via python-dateutil
 sympy==1.13.2
     # via torch
 threadpoolctl==3.5.0
@@ -82,5 +91,7 @@ typing-extensions==4.12.2
     # via
     #   huggingface-hub
     #   torch
+tzdata==2024.2
+    # via pandas
 urllib3==2.2.3
     # via requests
