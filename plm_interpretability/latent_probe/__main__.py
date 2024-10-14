@@ -1,5 +1,6 @@
 import logging
 import os
+import random
 import warnings
 from dataclasses import dataclass
 from functools import lru_cache
@@ -27,6 +28,12 @@ class ResidueAnnotation:
     swissprot_header: str
     values: list[str]
 
+    # Value used to indicate that we don't care about the notes on the annotation,
+    # as long as the annotation exists. E.g. signal peptides annotations look like
+    # `{'start': 1, 'end': 24, 'evidence': 'ECO:0000255'}`, so we just classify
+    # whether the residue is part of a signal peptide or not.
+    ALL = "all"
+
 
 RESIDUE_ANNOTATIONS = [
     ResidueAnnotation(
@@ -47,6 +54,25 @@ RESIDUE_ANNOTATIONS = [
             "Cysteine switch",
         ],
     ),
+    ResidueAnnotation(
+        name="Topological domain",
+        swissprot_header="TOPO_DOM",
+        values=[
+            "Cytoplasmic",
+            "Extracellular",
+            "Lumenal",
+            "Periplasmic",
+            "Mitochondrial intermembrane",
+            "Mitochondrial matrix",
+            "Virion surface",
+            "Intravirion",
+        ],
+    ),
+    ResidueAnnotation(
+        name="Signal peptide",
+        swissprot_header="SIGNAL",
+        values=[ResidueAnnotation.ALL],
+    ),
 ]
 
 
@@ -60,8 +86,10 @@ def get_sae_acts(
 ):
     esm_layer_acts = get_layer_activations(
         tokenizer=tokenizer, plm=plm_model, seqs=[seq], layer=plm_layer
-    )
-    return sae_model.get_acts(esm_layer_acts)[1:-1]
+    )[0]
+    sae_acts = sae_model.get_acts(esm_layer_acts)[1:-1]  # Trim BOS and EOS tokens
+    assert sae_acts.shape[0] == len(seq)
+    return sae_acts
 
 
 @click.command()
@@ -95,6 +123,12 @@ def get_sae_acts(
     required=True,
     help="Path to the output directory",
 )
+@click.option(
+    "--max-seqs-per-task",
+    type=int,
+    default=1000,
+    help="Maximum number of sequences to use for a given logistic regression task",
+)
 def latent_probe(
     sae_checkpoint: str,
     sae_dim: int,
@@ -102,6 +136,7 @@ def latent_probe(
     plm_layer: int,
     swissprot_tsv: str,
     output_dir: str,
+    max_seqs_per_task: int,
 ):
     """
     Run 1D logistic regression probing for each latent dimension for SAE evaluation.
@@ -115,7 +150,6 @@ def latent_probe(
     plm_model = (
         EsmModel.from_pretrained("facebook/esm2_t33_650M_UR50D").to(device).eval()
     )
-
     sae_model = SparseAutoencoder(plm_dim, sae_dim).to(device)
     sae_model.load_state_dict(torch.load(sae_checkpoint, map_location=device))
 
@@ -131,21 +165,47 @@ def latent_probe(
                 logger.warning(f"Skipping {output_path} because it already exists")
                 continue
 
+            # First, map each sequence to a list of annotations entries like:
+            # {
+            #     "AAA": [
+            #         {"start": 1, "end": 24, "note": "H-T-H motif"},
+            #         {"start": 100, "end": 120, "note": "Homeobox"},
+            #     ],
+            # }
             seq_to_annotation_entries = {}
             for _, row in df[df[annotation.name].notna()].iterrows():
                 seq = row["Sequence"]
                 entries = parse_swissprot_annotation(
                     row[annotation.name], header=annotation.swissprot_header
                 )
-                entries = [e for e in entries if label in e.get("note", "")]
+                if label != ResidueAnnotation.ALL:
+                    # The note field is sometimes like "Homeobox", "Homeobox 1", etc.,
+                    # so use string `in` to check.
+                    entries = [e for e in entries if label in e.get("note", "")]
                 if len(entries) > 0:
                     seq_to_annotation_entries[seq] = entries
             logger.info(
                 f"Found {len(seq_to_annotation_entries)} sequences with label {label}"
             )
 
-            # Collect examples: 1 example per residue where the label is whether the
-            # residue is positive for the label.
+            if len(seq_to_annotation_entries) > max_seqs_per_task:
+                logger.warning(
+                    f"Since max_seqs_per_task={max_seqs_per_task}, sing a random "
+                    f"sample of {max_seqs_per_task} sequences."
+                )
+                subset_seqs = random.sample(
+                    list(seq_to_annotation_entries.keys()), max_seqs_per_task
+                )
+                seq_to_annotation_entries = {
+                    seq: entries
+                    for seq, entries in seq_to_annotation_entries.items()
+                    if seq in subset_seqs
+                }
+
+            # Then, create 1 example for each residue in each sequence.
+            # Input: SAE activation at the residue position
+            # Target: Boolean indication whether the residue is annotated with
+            # the label, e.g. whether it falls within motif labeled "H-T-H motif".
             examples = []
             num_positive_examples = 0
             for seq, entries in seq_to_annotation_entries.items():
@@ -166,7 +226,7 @@ def latent_probe(
                     examples.append(
                         {
                             "sae_acts": pos_sae_acts,
-                            "label": i in positive_positions,
+                            "target": i in positive_positions,
                         }
                     )
                     if i in positive_positions:
@@ -180,7 +240,7 @@ def latent_probe(
                 examples,
                 test_size=0.1,
                 random_state=42,
-                stratify=[e["label"] for e in examples],
+                stratify=[e["target"] for e in examples],
             )
 
             with warnings.catch_warnings():
@@ -192,9 +252,9 @@ def latent_probe(
                 for dim in range(sae_dim):
                     model = LogisticRegression(class_weight="balanced")
                     X_train = [[e["sae_acts"][dim]] for e in train_examples]
-                    y_train = [e["label"] for e in train_examples]
+                    y_train = [e["target"] for e in train_examples]
                     X_test = [[e["sae_acts"][dim]] for e in test_examples]
-                    y_test = [e["label"] for e in test_examples]
+                    y_test = [e["target"] for e in test_examples]
 
                     model.fit(X_train, y_train)
 

@@ -117,7 +117,7 @@ def parse_swissprot_annotation(annotation_str: str, header: str) -> list[dict]:
         annotations_dict = {}
         for part in parts[1:]:
             key, value = part.split("=", 1)
-            annotations_dict[key] = value.replace('"', "")
+            annotations_dict[key] = value.replace('"', "").replace(";", "").strip()
 
         try:
             list(map(int, coords))
