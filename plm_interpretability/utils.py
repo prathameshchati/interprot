@@ -87,3 +87,50 @@ def train_val_test_split(
     seqs_val = seqs_val_test.filter(is_val)
     seqs_test = seqs_val_test.filter(~is_val)
     return seqs_train, seqs_val, seqs_test
+
+
+def parse_swissprot_annotation(annotation_str: str, header: str) -> list[dict]:
+    """
+    Parse a SwissProt annotation string like this:
+
+    ```
+    MOTIF 119..132; /note="JAMM motif"; /evidence="ECO:0000255|PROSITE-ProRule:PRU01182"
+    ```
+    where MOTIF is the header argument.
+
+    Returns:
+        [{
+            "start": 119,
+            "end": 132,
+            "note": "JAMM motif",
+            "evidence": "ECO:0000255|PROSITE-ProRule:PRU01182",
+        }]
+    """
+    res = []
+    occurrences = [o for o in annotation_str.split(header + " ") if len(o) > 0]
+    for o in occurrences:
+        parts = [p for p in o.split("; /") if len(p) > 0]
+
+        pos_part = parts[0]
+        coords = pos_part.split("..")
+
+        annotations_dict = {}
+        for part in parts[1:]:
+            key, value = part.split("=", 1)
+            annotations_dict[key] = value.replace('"', "")
+
+        try:
+            list(map(int, coords))
+        except ValueError:
+            continue
+        if len(annotations_dict) == 0:
+            continue
+
+        res.append(
+            {
+                "start": int(coords[0]),
+                "end": int(coords[1]) if len(coords) > 1 else int(coords[0]),
+                **annotations_dict,
+            }
+        )
+    return res
