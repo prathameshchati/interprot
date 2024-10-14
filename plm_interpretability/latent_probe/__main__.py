@@ -1,9 +1,10 @@
+import functools
 import logging
 import os
 import random
 import warnings
 from dataclasses import dataclass
-from functools import lru_cache
+from multiprocessing import Pool
 
 import click
 import numpy as np
@@ -107,7 +108,7 @@ RESIDUE_ANNOTATIONS = [
 ]
 
 
-@lru_cache(maxsize=10000)
+@functools.lru_cache(maxsize=10000)
 def get_sae_acts(
     seq: str,
     tokenizer: AutoTokenizer,
@@ -246,6 +247,22 @@ def make_examples_from_annotation_entries(
     return examples
 
 
+def run_logistic_regression_on_latent(
+    dim: int,
+    X_train: list[list[float]],
+    y_train: list[bool],
+    X_test: list[list[float]],
+    y_test: list[bool],
+) -> tuple[int, float, float, float]:
+    model = LogisticRegression(class_weight="balanced")
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+    return (dim, precision, recall, f1)
+
+
 @click.command()
 @click.option(
     "--sae-checkpoint",
@@ -344,28 +361,36 @@ def latent_probe(
                 # This is expected for most dimensions.
                 warnings.simplefilter("ignore")
 
-                res_rows = []
-                for dim in tqdm(
-                    range(sae_dim),
-                    desc=(
-                        "Logistic regression on each latent dimension for "
-                        f"{annotation.name}: {class_name}"
-                    ),
-                ):
-                    model = LogisticRegression(class_weight="balanced")
-                    X_train = [[e["sae_acts"][dim]] for e in train_examples]
-                    y_train = [e["target"] for e in train_examples]
-                    X_test = [[e["sae_acts"][dim]] for e in test_examples]
-                    y_test = [e["target"] for e in test_examples]
+                X_train = [
+                    [e["sae_acts"][dim] for dim in range(sae_dim)]
+                    for e in train_examples
+                ]
+                y_train = [e["target"] for e in train_examples]
+                X_test = [
+                    [e["sae_acts"][dim] for dim in range(sae_dim)]
+                    for e in test_examples
+                ]
+                y_test = [e["target"] for e in test_examples]
 
-                    model.fit(X_train, y_train)
+                run_func = functools.partial(
+                    run_logistic_regression_on_latent,
+                    X_train=X_train,
+                    y_train=y_train,
+                    X_test=X_test,
+                    y_test=y_test,
+                )
 
-                    y_pred = model.predict(X_test)
-
-                    precision = precision_score(y_test, y_pred)
-                    recall = recall_score(y_test, y_pred)
-                    f1 = f1_score(y_test, y_pred)
-                    res_rows.append([dim, precision, recall, f1])
+                with Pool() as pool:
+                    res_rows = list(
+                        tqdm(
+                            pool.imap(run_func, range(sae_dim)),
+                            total=sae_dim,
+                            desc=(
+                                "Logistic regression on each latent dimension for "
+                                f"{annotation.name}: {class_name}"
+                            ),
+                        )
+                    )
 
                 res_df = pd.DataFrame(
                     res_rows, columns=["dim", "precision", "recall", "f1"]
