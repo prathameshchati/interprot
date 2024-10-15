@@ -144,6 +144,7 @@ def get_annotation_entries_for_class(
     Downsample to max_seqs_per_task if necessary.
     """
     seq_to_annotation_entries = {}
+    seq_lengths = []
     for _, row in swissprot_df[swissprot_df[annotation.name].notna()].iterrows():
         seq = row["Sequence"]
         entries = parse_swissprot_annotation(
@@ -155,7 +156,13 @@ def get_annotation_entries_for_class(
             entries = [e for e in entries if class_name in e.get("note", "")]
         if len(entries) > 0:
             seq_to_annotation_entries[seq] = entries
-    logger.info(f"Found {len(seq_to_annotation_entries)} sequences with class {class_name}")
+            seq_lengths.append(len(seq))
+
+    logger.info(
+        f"Found {len(seq_to_annotation_entries)} sequences with class {class_name}."
+        f"Sequence length min: {min(seq_lengths)}, max: {max(seq_lengths)}, "
+        f"mean: {np.mean(seq_lengths)}."
+    )
 
     if len(seq_to_annotation_entries) > max_seqs_per_task:
         logger.warning(
