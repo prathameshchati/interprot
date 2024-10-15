@@ -1,4 +1,5 @@
 import functools
+import gc
 import logging
 import os
 import random
@@ -107,7 +108,7 @@ RESIDUE_ANNOTATIONS = [
 ]
 
 
-@functools.lru_cache(maxsize=10000)
+@functools.lru_cache(maxsize=5000)
 def get_sae_acts(
     seq: str,
     tokenizer: AutoTokenizer,
@@ -266,6 +267,8 @@ def run_logistic_regression_on_latent(
     precision = precision_score(y_test, y_pred)
     recall = recall_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred)
+
+    del X_train, y_train, X_test, y_test, X_train_dim, X_test_dim, model, y_pred
     return (dim, precision, recall, f1)
 
 
@@ -356,7 +359,6 @@ def latent_probe(
                 sae_model=sae_model,
                 plm_layer=plm_layer,
             )
-
             # Run logistic regression for each dimension where the input is a number
             # – the SAE activation of a fixed dimension at a fixed position – and
             # the target is the binary target.
@@ -406,15 +408,19 @@ def latent_probe(
                     X_test_mmap.flush()
                     y_test_mmap.flush()
 
+                    shape_train = X_train.shape
+                    shape_test = X_test.shape
+                    del X_train, y_train, X_test, y_test
                     run_func = functools.partial(
                         run_logistic_regression_on_latent,
                         X_train_filename=X_train_filename,
                         y_train_filename=y_train_filename,
                         X_test_filename=X_test_filename,
                         y_test_filename=y_test_filename,
-                        shape_train=X_train.shape,
-                        shape_test=X_test.shape,
+                        shape_train=shape_train,
+                        shape_test=shape_test,
                     )
+
                     with Pool() as pool:
                         res_rows = list(
                             tqdm(
@@ -434,6 +440,9 @@ def latent_probe(
 
                 res_df.to_csv(output_path, index=False)
                 logger.info(f"Results saved to {output_path}")
+
+            del seq_to_annotation_entries, examples, train_examples, test_examples
+            gc.collect()
 
 
 if __name__ == "__main__":
