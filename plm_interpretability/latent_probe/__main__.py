@@ -108,7 +108,7 @@ RESIDUE_ANNOTATIONS = [
 ]
 
 
-@functools.lru_cache(maxsize=5000)
+# @functools.lru_cache(maxsize=5000)
 def get_sae_acts(
     seq: str,
     tokenizer: AutoTokenizer,
