@@ -20,11 +20,15 @@ requires-python = ">=3.10"
 readme = "README.md"
 
 [tool.setuptools]
-packages = ["plm_interpretability", "plm_interpretability.autointerp", "plm_interpretability.latent_probe"]
+packages = [
+    "plm_interpretability",
+    "plm_interpretability.autointerp",
+    "plm_interpretability.logistic_regression_probe"
+]
 
 [project.scripts]
 autointerp = "plm_interpretability.autointerp.__main__:cli"
-latent_probe = "plm_interpretability.latent_probe.__main__:latent_probe"
+logistic_regression_probe = "plm_interpretability.logistic_regression_probe.__main__:cli"
 
 [project.urls]
 Homepage = "https://github.com/etowahadams/plm-interpretability"
