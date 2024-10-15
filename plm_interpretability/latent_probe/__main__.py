@@ -108,7 +108,6 @@ RESIDUE_ANNOTATIONS = [
 ]
 
 
-# @functools.lru_cache(maxsize=5000)
 def get_sae_acts(
     seq: str,
     tokenizer: AutoTokenizer,
@@ -154,14 +153,13 @@ def get_annotation_entries_for_class(
             # The note field is sometimes like "Homeobox", "Homeobox 1", etc.,
             # so use string `in` to check.
             entries = [e for e in entries if class_name in e.get("note", "")]
-        if len(entries) > 0:
+        if len(entries) > 0 and len(seq) < 2000:
             seq_to_annotation_entries[seq] = entries
             seq_lengths.append(len(seq))
 
     logger.info(
         f"Found {len(seq_to_annotation_entries)} sequences with class {class_name}."
-        f"Sequence length min: {min(seq_lengths)}, max: {max(seq_lengths)}, "
-        f"mean: {np.mean(seq_lengths)}."
+        f"Mean sequence length: {np.mean(seq_lengths):.2f}."
     )
 
     if len(seq_to_annotation_entries) > max_seqs_per_task:
