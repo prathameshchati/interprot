@@ -7,7 +7,6 @@ import pandas as pd
 import torch
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score, precision_score, recall_score
-from sklearn.model_selection import train_test_split
 from transformers import AutoTokenizer, EsmModel
 
 from plm_interpretability.logistic_regression_probe.annotations import (
@@ -18,6 +17,7 @@ from plm_interpretability.logistic_regression_probe.logging import logger
 from plm_interpretability.logistic_regression_probe.utils import (
     get_annotation_entries_for_class,
     make_examples_from_annotation_entries,
+    train_test_split_by_homology,
 )
 from plm_interpretability.sae_model import SparseAutoencoder
 
@@ -94,22 +94,40 @@ def all_latents(
         logger.info(f"Processing annotation: {annotation.name}")
 
         for class_name in annotation.class_names:
-            seq_to_annotation_entries = get_annotation_entries_for_class(
-                df, annotation, class_name, max_seqs_per_task
+            # First, get all sequences with the target annotations
+            seq_to_annotation_entries = get_annotation_entries_for_class(df, annotation, class_name)
+
+            # Then, split into train and test
+            train_seqs, test_seqs = train_test_split_by_homology(
+                list(seq_to_annotation_entries.keys()), max_seqs=max_seqs_per_task
             )
-            examples = make_examples_from_annotation_entries(
-                seq_to_annotation_entries=seq_to_annotation_entries,
+            train_seq_to_annotation_entries = {
+                seq: entries
+                for seq, entries in seq_to_annotation_entries.items()
+                if seq in train_seqs
+            }
+            test_seq_to_annotation_entries = {
+                seq: entries
+                for seq, entries in seq_to_annotation_entries.items()
+                if seq in test_seqs
+            }
+
+            # Make examples that contain SAE activations and a binary target
+            train_examples = make_examples_from_annotation_entries(
+                seq_to_annotation_entries=train_seq_to_annotation_entries,
                 tokenizer=tokenizer,
                 plm_model=plm_model,
                 sae_model=sae_model,
                 plm_layer=plm_layer,
             )
-            train_examples, test_examples = train_test_split(
-                examples,
-                test_size=0.1,
-                random_state=42,
-                stratify=[e["target"] for e in examples],
+            test_examples = make_examples_from_annotation_entries(
+                seq_to_annotation_entries=test_seq_to_annotation_entries,
+                tokenizer=tokenizer,
+                plm_model=plm_model,
+                sae_model=sae_model,
+                plm_layer=plm_layer,
             )
+
             with warnings.catch_warnings():
                 # LogisticRegression throws warnings when it can't converge.
                 # This is expected for most dimensions.
@@ -142,5 +160,5 @@ def all_latents(
             res_df.to_csv(output_file, index=False)
             logger.info(f"Results saved to {output_file}")
 
-            del seq_to_annotation_entries, examples, train_examples, test_examples
+            del seq_to_annotation_entries, train_examples, test_examples
             gc.collect()

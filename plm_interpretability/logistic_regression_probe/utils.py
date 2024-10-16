@@ -17,7 +17,7 @@ from plm_interpretability.utils import get_layer_activations, parse_swissprot_an
 MAX_SEQ_LEN = 1000
 
 
-def write_fasta(sequences, filename):
+def write_fasta(sequences: list[str], filename: str):
     with open(filename, "w") as f:
         for i, seq in enumerate(sequences):
             f.write(f">seq_{i}\n{seq}\n")
@@ -60,8 +60,11 @@ def extract_sequences(
 
 
 def train_test_split_by_homology(
-    sequences: list[str], test_ratio: float = 0.1, similarity_threshold: float = 0.4
-):
+    sequences: list[str],
+    max_seqs: int,
+    test_ratio: float = 0.1,
+    similarity_threshold: float = 0.4,
+) -> tuple[set[str], set[str]]:
     output_prefix = "clustered_sequences"
     with tempfile.TemporaryDirectory() as tmp_dir:
         input_fasta = os.path.join(tmp_dir, "input_sequences.fasta")
@@ -86,13 +89,30 @@ def train_test_split_by_homology(
 
         clusters = parse_mmseqs2_clusters(f"{output_prefix}_cluster.tsv")
 
-        train_clusters, test_clusters = split_clusters(clusters, test_ratio)
-        train_seqs, test_seqs = extract_sequences(
-            sequences, train_clusters, test_clusters, clusters
-        )
+    # Filter to num_sequences most dissimilar sequences
+    filtered_clusters = dict(list(clusters.items())[:max_seqs])
 
-        print(f"Train sequences: {len(train_seqs)}")
-        print(f"Test sequences: {len(test_seqs)}")
+    # If we don't have enough sequences, add more from the remaining clusters
+    if len(filtered_clusters) < max_seqs:
+        remaining_clusters = dict(list(clusters.items())[max_seqs:])
+        for rep, members in remaining_clusters.items():
+            filtered_clusters[rep] = members
+            if len(filtered_clusters) >= max_seqs:
+                break
+
+    # Split clusters into train and test
+    train_clusters, test_clusters = split_clusters(filtered_clusters, test_ratio)
+
+    # Extract sequences
+    seq_dict = {f"seq_{i}": seq for i, seq in enumerate(sequences)}
+    train_seqs, test_seqs = set(), set()
+    for cluster in train_clusters:
+        train_seqs.update([seq_dict[seq_id] for seq_id in filtered_clusters[cluster]])
+    for cluster in test_clusters:
+        test_seqs.update([seq_dict[seq_id] for seq_id in filtered_clusters[cluster]])
+
+    logger.info(f"Train sequences: {len(train_seqs)}")
+    logger.info(f"Test sequences: {len(test_seqs)}")
 
     return train_seqs, test_seqs
 
@@ -118,7 +138,6 @@ def get_annotation_entries_for_class(
     swissprot_df: pd.DataFrame,
     annotation: ResidueAnnotation,
     class_name: str,
-    max_seqs_per_task: int,
 ) -> dict[str, list[dict]]:
     """
     Map each sequence to a list of annotations entries like:
@@ -150,16 +169,6 @@ def get_annotation_entries_for_class(
         f"Found {len(seq_to_annotation_entries)} sequences with class {class_name}. "
         f"Mean sequence length: {np.mean(seq_lengths):.2f}."
     )
-
-    if len(seq_to_annotation_entries) > max_seqs_per_task:
-        logger.warning(
-            f"Since max_seqs_per_task={max_seqs_per_task}, using a random "
-            f"sample of {max_seqs_per_task} sequences."
-        )
-        subset_seqs = random.sample(list(seq_to_annotation_entries.keys()), max_seqs_per_task)
-        seq_to_annotation_entries = {
-            seq: entries for seq, entries in seq_to_annotation_entries.items() if seq in subset_seqs
-        }
 
     return seq_to_annotation_entries
 
