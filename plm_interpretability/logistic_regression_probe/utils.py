@@ -1,3 +1,4 @@
+import gc
 import os
 import random
 import subprocess
@@ -198,17 +199,11 @@ def make_examples_from_annotation_entries(
     of given class, e.g. whether it falls within a motif of class
     "H-T-H motif".
 
-    Returns a list of dicts like:
+    Returns a list of Example objects like
     ```
     [
-        {
-            "sae_acts": [0.1, 0.2, 0.3, ...], # A number for each latent
-            "target": True,
-        },
-        {
-            "sae_acts": [0.4, 0.5, 0.6, ...],
-            "target": False,
-        },
+        Example(sae_acts=[0.1, 0.2, 0.3, ...], target=True),
+        Example(sae_acts=[0.4, 0.5, 0.6, ...], target=False),
         ...
     ]
     ```
@@ -300,4 +295,7 @@ def prepare_arrays_for_logistic_regression(
     X_test = np.array([e.sae_acts for e in test_examples], dtype="float32")
     y_test = np.array([e.target for e in test_examples], dtype="bool")
 
+    del train_seqs, test_seqs, train_seq_to_annotation_entries, test_seq_to_annotation_entries
+    del train_examples, test_examples
+    gc.collect()
     return X_train, y_train, X_test, y_test
