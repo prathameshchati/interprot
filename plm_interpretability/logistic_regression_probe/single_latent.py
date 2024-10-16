@@ -15,7 +15,10 @@ from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 from transformers import AutoTokenizer, EsmModel
 
-from plm_interpretability.logistic_regression_probe.annotations import RESIDUE_ANNOTATIONS
+from plm_interpretability.logistic_regression_probe.annotations import (
+    RESIDUE_ANNOTATION_NAMES,
+    RESIDUE_ANNOTATIONS,
+)
 from plm_interpretability.logistic_regression_probe.logging import logger
 from plm_interpretability.logistic_regression_probe.utils import (
     get_annotation_entries_for_class,
@@ -105,6 +108,10 @@ def single_latent(
     """
     Run 1D logistic regression probing for each latent dimension for SAE evaluation.
     """
+    for name in annotation_names:
+        if name not in RESIDUE_ANNOTATION_NAMES:
+            raise ValueError(f"Invalid annotation name: {name}")
+
     os.makedirs(output_dir, exist_ok=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.debug(f"Using device: {device}")

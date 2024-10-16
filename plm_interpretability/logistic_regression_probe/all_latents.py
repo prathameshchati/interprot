@@ -10,7 +10,10 @@ from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 from transformers import AutoTokenizer, EsmModel
 
-from plm_interpretability.logistic_regression_probe.annotations import RESIDUE_ANNOTATIONS
+from plm_interpretability.logistic_regression_probe.annotations import (
+    RESIDUE_ANNOTATION_NAMES,
+    RESIDUE_ANNOTATIONS,
+)
 from plm_interpretability.logistic_regression_probe.logging import logger
 from plm_interpretability.logistic_regression_probe.utils import (
     get_annotation_entries_for_class,
@@ -68,6 +71,10 @@ def all_latents(
     annotation_names: list[str],
     max_seqs_per_task: int,
 ):
+    for name in annotation_names:
+        if name not in RESIDUE_ANNOTATION_NAMES:
+            raise ValueError(f"Invalid annotation name: {name}")
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.debug(f"Using device: {device}")
 

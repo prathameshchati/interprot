@@ -82,3 +82,4 @@ RESIDUE_ANNOTATIONS = [
         class_names=[ResidueAnnotation.ALL_CLASSES, "Mitochondrion", "Chloroplast"],
     ),
 ]
+RESIDUE_ANNOTATION_NAMES = {a.name for a in RESIDUE_ANNOTATIONS}
