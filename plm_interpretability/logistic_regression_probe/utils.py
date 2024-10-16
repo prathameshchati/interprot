@@ -1,4 +1,8 @@
+import os
 import random
+import subprocess
+import tempfile
+from collections import defaultdict
 
 import numpy as np
 import pandas as pd
@@ -11,6 +15,86 @@ from plm_interpretability.sae_model import SparseAutoencoder
 from plm_interpretability.utils import get_layer_activations, parse_swissprot_annotation
 
 MAX_SEQ_LEN = 1000
+
+
+def write_fasta(sequences, filename):
+    with open(filename, "w") as f:
+        for i, seq in enumerate(sequences):
+            f.write(f">seq_{i}\n{seq}\n")
+
+
+def parse_mmseqs2_clusters(cluster_file: str) -> dict[str, list[str]]:
+    clusters = defaultdict(list)
+    with open(cluster_file, "r") as f:
+        for line in f:
+            rep, member = line.strip().split("\t")
+            clusters[rep].append(member)
+    return clusters
+
+
+def split_clusters(clusters: dict[str, list[str]], test_ratio: float = 0.1):
+    cluster_ids = list(clusters.keys())
+    random.shuffle(cluster_ids)
+    split_point = int(len(cluster_ids) * (1 - test_ratio))
+    train_clusters = cluster_ids[:split_point]
+    test_clusters = cluster_ids[split_point:]
+    return train_clusters, test_clusters
+
+
+def extract_sequences(
+    sequences: list[str],
+    train_clusters: list[str],
+    test_clusters: list[str],
+    clusters: dict[str, list[str]],
+):
+    seq_dict = {f"seq_{i}": seq for i, seq in enumerate(sequences)}
+    train_seqs = []
+    test_seqs = []
+
+    for cluster in train_clusters:
+        train_seqs.extend([seq_dict[seq_id] for seq_id in clusters[cluster]])
+    for cluster in test_clusters:
+        test_seqs.extend([seq_dict[seq_id] for seq_id in clusters[cluster]])
+
+    return train_seqs, test_seqs
+
+
+def train_test_split_by_homology(
+    sequences: list[str], test_ratio: float = 0.1, similarity_threshold: float = 0.4
+):
+    output_prefix = "clustered_sequences"
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        input_fasta = os.path.join(tmp_dir, "input_sequences.fasta")
+        write_fasta(sequences, input_fasta)
+
+        subprocess.run(
+            [
+                "mmseqs",
+                "easy-cluster",
+                input_fasta,
+                output_prefix,
+                tmp_dir,
+                "--min-seq-id",
+                str(similarity_threshold),
+                "-c",
+                "0.8",
+                "--cov-mode",
+                "1",
+            ],
+            check=True,
+        )
+
+        clusters = parse_mmseqs2_clusters(f"{output_prefix}_cluster.tsv")
+
+        train_clusters, test_clusters = split_clusters(clusters, test_ratio)
+        train_seqs, test_seqs = extract_sequences(
+            sequences, train_clusters, test_clusters, clusters
+        )
+
+        print(f"Train sequences: {len(train_seqs)}")
+        print(f"Test sequences: {len(test_seqs)}")
+
+    return train_seqs, test_seqs
 
 
 def get_sae_acts(
