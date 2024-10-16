@@ -4,16 +4,14 @@ from unittest.mock import Mock, patch
 import numpy as np
 import pandas as pd
 from click.testing import CliRunner
+from sklearn.model_selection import train_test_split
 
 from plm_interpretability.logistic_regression_probe.single_latent import single_latent
 
 
 class TestSingleLatentProbe(unittest.TestCase):
     @patch(
-        "plm_interpretability.logistic_regression_probe.single_latent.make_examples_from_annotation_entries"
-    )
-    @patch(
-        "plm_interpretability.logistic_regression_probe.single_latent.get_annotation_entries_for_class"
+        "plm_interpretability.logistic_regression_probe.single_latent.prepare_arrays_for_logistic_regression"
     )
     @patch("plm_interpretability.logistic_regression_probe.single_latent.torch.load")
     @patch(
@@ -27,32 +25,30 @@ class TestSingleLatentProbe(unittest.TestCase):
         mock_esm,
         mock_tokenizer,
         mock_torch_load,
-        mock_get_annotation_entries_for_class,
-        mock_make_examples_from_annotation_entries,
+        mock_prepare_arrays_for_logistic_regression,
     ):
         mock_torch_load.return_value = {}
         mock_tokenizer.return_value = None
         mock_esm.return_value = Mock(to=Mock())
         mock_sae.return_value = Mock(to=Mock())
 
-        # Assign some random positions our test annotation
-        mock_get_annotation_entries_for_class.return_value = {
-            "AAAAAAAAAA": [
-                {"start": 1, "end": 5, "note": "H-T-H motif"},
-                {"start": 7, "end": 7, "note": "H-T-H motif"},
-            ],
-            "CCCCCCCCCC": [
-                {"start": 2, "end": 6, "note": "H-T-H motif"},
-            ],
-        }
-
         # Mock SAE activations to make hidden dim 2 correlate perfectly with the
         # test annotations
         true_sae_acts, false_sae_acts = np.zeros((10,)), np.zeros((10,))
         true_sae_acts[2] = 1
-        mock_make_examples_from_annotation_entries.return_value = [
-            {"sae_acts": true_sae_acts, "target": True} for _ in range(10)
-        ] + [{"sae_acts": false_sae_acts, "target": False} for _ in range(10)]
+
+        mock_examples = [(true_sae_acts, True) for _ in range(100)] + [
+            (false_sae_acts, False) for _ in range(100)
+        ]
+        train_examples, test_examples = train_test_split(
+            mock_examples, test_size=0.1, random_state=42
+        )
+        mock_prepare_arrays_for_logistic_regression.return_value = (
+            np.vstack([x[0] for x in train_examples]),
+            np.array([x[1] for x in train_examples]),
+            np.vstack([x[0] for x in test_examples]),
+            np.array([x[1] for x in test_examples]),
+        )
 
         runner = CliRunner()
         with runner.isolated_filesystem():
@@ -82,6 +78,7 @@ class TestSingleLatentProbe(unittest.TestCase):
                     "4",
                 ],
             )
+            print(result.output, result.exception)
             self.assertEqual(result.exit_code, 0)
             results_df = pd.read_csv("dummy_output/DNA binding/H-T-H motif.csv")
 

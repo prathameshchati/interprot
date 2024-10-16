@@ -3,6 +3,7 @@ import random
 import subprocess
 import tempfile
 from collections import defaultdict
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
@@ -15,6 +16,17 @@ from plm_interpretability.sae_model import SparseAutoencoder
 from plm_interpretability.utils import get_layer_activations, parse_swissprot_annotation
 
 MAX_SEQ_LEN = 1000
+
+
+@dataclass
+class Example:
+    sae_acts: np.ndarray[float]
+    target: bool
+
+    def __eq__(self, other):
+        if not isinstance(other, Example):
+            return NotImplemented
+        return np.array_equal(self.sae_acts, other.sae_acts) and self.target == other.target
 
 
 def write_fasta(sequences: list[str], filename: str):
@@ -167,7 +179,7 @@ def make_examples_from_annotation_entries(
     plm_model: EsmModel,
     sae_model: SparseAutoencoder,
     plm_layer: int,
-):
+) -> list[Example]:
     """
     Given a dict like this:
     ```
@@ -222,13 +234,70 @@ def make_examples_from_annotation_entries(
 
         for i, pos_sae_acts in enumerate(sae_acts):
             examples.append(
-                {
-                    "sae_acts": pos_sae_acts,
-                    "target": i in positive_positions,
-                }
+                Example(
+                    sae_acts=pos_sae_acts,
+                    target=i in positive_positions,
+                )
             )
             if i in positive_positions:
                 num_positive_examples += 1
 
     logger.info(f"Made {len(examples)} examples ({num_positive_examples} positive)")
     return examples
+
+
+def prepare_arrays_for_logistic_regression(
+    df: pd.DataFrame,
+    annotation: ResidueAnnotation,
+    class_name: str,
+    max_seqs_per_task: int,
+    tokenizer: AutoTokenizer,
+    plm_model: EsmModel,
+    sae_model: SparseAutoencoder,
+    plm_layer: int,
+) -> tuple[np.ndarray[float], np.ndarray[float], np.ndarray[float], np.ndarray[float]]:
+    """
+    Given the swissprot dataframe and the desired annotation and class, creates examples that
+    can be passed directly to logistic regression. This involves:
+    1. Clustering the sequences by homology and downsampling to max_seqs_per_task dissimilar
+        sequences
+    2. Splitting the sequences into train and test sets
+    3. ESM inference -> SAE inference -> get SAE activations for each residue in each sequence
+    4. Create examples from the SAE activations and the binary target
+    """
+    # First, get all sequences with the target annotations
+    seq_to_annotation_entries = get_annotation_entries_for_class(df, annotation, class_name)
+
+    # Then, split into train and test
+    train_seqs, test_seqs = train_test_split_by_homology(
+        list(seq_to_annotation_entries.keys()), max_seqs=max_seqs_per_task
+    )
+    train_seq_to_annotation_entries = {
+        seq: entries for seq, entries in seq_to_annotation_entries.items() if seq in train_seqs
+    }
+    test_seq_to_annotation_entries = {
+        seq: entries for seq, entries in seq_to_annotation_entries.items() if seq in test_seqs
+    }
+
+    # Make examples for each split
+    train_examples = make_examples_from_annotation_entries(
+        seq_to_annotation_entries=train_seq_to_annotation_entries,
+        tokenizer=tokenizer,
+        plm_model=plm_model,
+        sae_model=sae_model,
+        plm_layer=plm_layer,
+    )
+    test_examples = make_examples_from_annotation_entries(
+        seq_to_annotation_entries=test_seq_to_annotation_entries,
+        tokenizer=tokenizer,
+        plm_model=plm_model,
+        sae_model=sae_model,
+        plm_layer=plm_layer,
+    )
+
+    X_train = np.array([e.sae_acts for e in train_examples], dtype="float32")
+    y_train = np.array([e.target for e in train_examples], dtype="bool")
+    X_test = np.array([e.sae_acts for e in test_examples], dtype="float32")
+    y_test = np.array([e.target for e in test_examples], dtype="bool")
+
+    return X_train, y_train, X_test, y_test

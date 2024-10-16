@@ -1,10 +1,12 @@
 import unittest
 from unittest.mock import Mock, patch
 
+import numpy as np
 import pandas as pd
 
 from plm_interpretability.logistic_regression_probe.annotations import ResidueAnnotation
 from plm_interpretability.logistic_regression_probe.utils import (
+    Example,
     get_annotation_entries_for_class,
     make_examples_from_annotation_entries,
 )
@@ -57,16 +59,16 @@ class TestUtils(unittest.TestCase):
         )
 
         self.assertEqual(len(examples), 12)
-        self.assertEqual(examples[0], {"sae_acts": [0.1, 0.2], "target": False})
-        self.assertEqual(examples[1], {"sae_acts": [0.3, 0.4], "target": True})
-        self.assertEqual(examples[2], {"sae_acts": [0.5, 0.6], "target": True})
-        self.assertEqual(examples[3], {"sae_acts": [0.7, 0.8], "target": True})
+        self.assertEqual(examples[0], Example(sae_acts=np.array([0.1, 0.2]), target=False))
+        self.assertEqual(examples[1], Example(sae_acts=np.array([0.3, 0.4]), target=True))
+        self.assertEqual(examples[2], Example(sae_acts=np.array([0.5, 0.6]), target=True))
+        self.assertEqual(examples[3], Example(sae_acts=np.array([0.7, 0.8]), target=True))
 
-        self.assertEqual(examples[6], {"sae_acts": [1.3, 1.4], "target": True})
-        self.assertEqual(examples[7], {"sae_acts": [1.5, 1.6], "target": True})
-        self.assertEqual(examples[8], {"sae_acts": [1.7, 1.8], "target": False})
-        self.assertEqual(examples[9], {"sae_acts": [1.9, 2.0], "target": False})
-        self.assertEqual(examples[10], {"sae_acts": [2.1, 2.2], "target": True})
+        self.assertEqual(examples[6], Example(sae_acts=np.array([1.3, 1.4]), target=True))
+        self.assertEqual(examples[7], Example(sae_acts=np.array([1.5, 1.6]), target=True))
+        self.assertEqual(examples[8], Example(sae_acts=np.array([1.7, 1.8]), target=False))
+        self.assertEqual(examples[9], Example(sae_acts=np.array([1.9, 2.0]), target=False))
+        self.assertEqual(examples[10], Example(sae_acts=np.array([2.1, 2.2]), target=True))
 
         mock_get_sae_acts.assert_any_call(
             seq="ABCDEF",

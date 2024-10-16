@@ -11,7 +11,6 @@ import pandas as pd
 import torch
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score, precision_score, recall_score
-from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 from transformers import AutoTokenizer, EsmModel
 
@@ -21,8 +20,7 @@ from plm_interpretability.logistic_regression_probe.annotations import (
 )
 from plm_interpretability.logistic_regression_probe.logging import logger
 from plm_interpretability.logistic_regression_probe.utils import (
-    get_annotation_entries_for_class,
-    make_examples_from_annotation_entries,
+    prepare_arrays_for_logistic_regression,
 )
 from plm_interpretability.sae_model import SparseAutoencoder
 
@@ -137,34 +135,20 @@ def single_latent(
                 logger.warning(f"Skipping {output_path} because it already exists")
                 continue
 
-            seq_to_annotation_entries = get_annotation_entries_for_class(
-                df, annotation, class_name, max_seqs_per_task
-            )
-            examples = make_examples_from_annotation_entries(
-                seq_to_annotation_entries=seq_to_annotation_entries,
+            X_train, y_train, X_test, y_test = prepare_arrays_for_logistic_regression(
+                df=df,
+                annotation=annotation,
+                class_name=class_name,
+                max_seqs_per_task=max_seqs_per_task,
                 tokenizer=tokenizer,
                 plm_model=plm_model,
                 sae_model=sae_model,
                 plm_layer=plm_layer,
             )
-            # Run logistic regression for each dimension where the input is a number
-            # – the SAE activation of a fixed dimension at a fixed position – and
-            # the target is the binary target.
-            train_examples, test_examples = train_test_split(
-                examples,
-                test_size=0.1,
-                random_state=42,
-                stratify=[e["target"] for e in examples],
-            )
             with warnings.catch_warnings():
                 # LogisticRegression throws warnings when it can't converge.
                 # This is expected for most dimensions.
                 warnings.simplefilter("ignore")
-
-                X_train = np.array([e["sae_acts"] for e in train_examples], dtype="float32")
-                y_train = np.array([e["target"] for e in train_examples], dtype="bool")
-                X_test = np.array([e["sae_acts"] for e in test_examples], dtype="float32")
-                y_test = np.array([e["target"] for e in test_examples], dtype="bool")
 
                 # Create memory-mapped files
                 with tempfile.TemporaryDirectory() as temp_dir:
@@ -198,7 +182,7 @@ def single_latent(
 
                     shape_train = X_train.shape
                     shape_test = X_test.shape
-                    del X_train, y_train, X_test, y_test
+
                     run_func = functools.partial(
                         run_logistic_regression_on_latent,
                         X_train_filename=X_train_filename,
@@ -229,5 +213,5 @@ def single_latent(
                 res_df.to_csv(output_path, index=False)
                 logger.info(f"Results saved to {output_path}")
 
-            del seq_to_annotation_entries, examples, train_examples, test_examples
+            del X_train, y_train, X_test, y_test
             gc.collect()
