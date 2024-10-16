@@ -17,6 +17,7 @@ from plm_interpretability.sae_model import SparseAutoencoder
 from plm_interpretability.utils import get_layer_activations, parse_swissprot_annotation
 
 MAX_SEQ_LEN = 1000
+DEBUG_WITH_RANDOM_ACTIVATIONS = True
 
 
 @dataclass
@@ -132,6 +133,8 @@ def get_sae_acts(
     """
     Returns a (len(seq), sae_dim) array of SAE activations.
     """
+    if DEBUG_WITH_RANDOM_ACTIVATIONS:
+        return np.random.randn(len(seq), 4096).astype(np.float32)
     esm_layer_acts = get_layer_activations(
         tokenizer=tokenizer, plm=plm_model, seqs=[seq], layer=plm_layer
     )[0]
@@ -290,7 +293,7 @@ def prepare_arrays_for_logistic_regression(
     sae_model: SparseAutoencoder,
     plm_layer: int,
     pool_over_annotation: bool,
-) -> tuple[np.ndarray[float], np.ndarray[float], np.ndarray[float], np.ndarray[float]]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Given the swissprot dataframe and the desired annotation and class, creates examples that
     can be passed directly to logistic regression. This involves:
