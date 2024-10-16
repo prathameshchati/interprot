@@ -92,24 +92,13 @@ def train_test_split_by_homology(
     # Filter to num_sequences most dissimilar sequences
     filtered_clusters = dict(list(clusters.items())[:max_seqs])
 
-    # If we don't have enough sequences, add more from the remaining clusters
-    if len(filtered_clusters) < max_seqs:
-        remaining_clusters = dict(list(clusters.items())[max_seqs:])
-        for rep, members in remaining_clusters.items():
-            filtered_clusters[rep] = members
-            if len(filtered_clusters) >= max_seqs:
-                break
-
     # Split clusters into train and test
     train_clusters, test_clusters = split_clusters(filtered_clusters, test_ratio)
 
     # Extract sequences
     seq_dict = {f"seq_{i}": seq for i, seq in enumerate(sequences)}
-    train_seqs, test_seqs = set(), set()
-    for cluster in train_clusters:
-        train_seqs.update([seq_dict[seq_id] for seq_id in filtered_clusters[cluster]])
-    for cluster in test_clusters:
-        test_seqs.update([seq_dict[seq_id] for seq_id in filtered_clusters[cluster]])
+    train_seqs = {seq_dict[seq_id] for seq_id in train_clusters}
+    test_seqs = {seq_dict[seq_id] for seq_id in test_clusters}
 
     logger.info(f"Train sequences: {len(train_seqs)}")
     logger.info(f"Test sequences: {len(test_seqs)}")
@@ -169,7 +158,6 @@ def get_annotation_entries_for_class(
         f"Found {len(seq_to_annotation_entries)} sequences with class {class_name}. "
         f"Mean sequence length: {np.mean(seq_lengths):.2f}."
     )
-
     return seq_to_annotation_entries
 
 
