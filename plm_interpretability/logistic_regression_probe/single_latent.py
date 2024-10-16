@@ -224,7 +224,3 @@ def single_latent(
 
             del seq_to_annotation_entries, examples, train_examples, test_examples
             gc.collect()
-
-
-if __name__ == "__main__":
-    single_latent()

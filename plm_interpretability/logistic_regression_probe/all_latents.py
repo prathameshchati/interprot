@@ -42,7 +42,7 @@ from plm_interpretability.sae_model import SparseAutoencoder
 )
 @click.option(
     "--output-file",
-    type=click.File(),
+    type=click.Path(),
     required=True,
     help="Path to the output file",
 )
@@ -131,7 +131,3 @@ def all_latents(
 
             del seq_to_annotation_entries, examples, train_examples, test_examples
             gc.collect()
-
-
-if __name__ == "__main__":
-    all_latents()

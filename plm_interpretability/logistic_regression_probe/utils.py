@@ -10,6 +10,8 @@ from plm_interpretability.logistic_regression_probe.logging import logger
 from plm_interpretability.sae_model import SparseAutoencoder
 from plm_interpretability.utils import get_layer_activations, parse_swissprot_annotation
 
+MAX_SEQ_LEN = 1000
+
 
 def get_sae_acts(
     seq: str,
@@ -56,12 +58,12 @@ def get_annotation_entries_for_class(
             # The note field is sometimes like "Homeobox", "Homeobox 1", etc.,
             # so use string `in` to check.
             entries = [e for e in entries if class_name in e.get("note", "")]
-        if len(entries) > 0 and len(seq) < 2000:
+        if len(entries) > 0 and len(seq) < MAX_SEQ_LEN:
             seq_to_annotation_entries[seq] = entries
             seq_lengths.append(len(seq))
 
     logger.info(
-        f"Found {len(seq_to_annotation_entries)} sequences with class {class_name}."
+        f"Found {len(seq_to_annotation_entries)} sequences with class {class_name}. "
         f"Mean sequence length: {np.mean(seq_lengths):.2f}."
     )
 
