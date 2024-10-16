@@ -78,8 +78,13 @@ def train_test_split_by_homology(
     test_ratio: float = 0.1,
     similarity_threshold: float = 0.4,
 ) -> tuple[set[str], set[str]]:
-    output_prefix = "clustered_sequences"
+    """
+    Given a list of sequences and a max_seqs cutoff:
+    1. Take max_seqs sequences that don't have too much homology
+    2. Split them into train and test sets
+    """
     with tempfile.TemporaryDirectory() as tmp_dir:
+        output_prefix = os.path.join(tmp_dir, "clusterRes")
         input_fasta = os.path.join(tmp_dir, "input_sequences.fasta")
         write_fasta(sequences, input_fasta)
 
@@ -102,20 +107,18 @@ def train_test_split_by_homology(
 
         clusters = parse_mmseqs2_clusters(f"{output_prefix}_cluster.tsv")
 
-    # Filter to num_sequences most dissimilar sequences
+    # Get max_seqs clusters, split them into train and test
     filtered_clusters = dict(list(clusters.items())[:max_seqs])
-
-    # Split clusters into train and test
     train_clusters, test_clusters = split_clusters(filtered_clusters, test_ratio)
 
-    # Extract sequences
+    # For each cluster, take only the representative sequence so only dissimilar
+    # sequences are kept
     seq_dict = {f"seq_{i}": seq for i, seq in enumerate(sequences)}
     train_seqs = {seq_dict[seq_id] for seq_id in train_clusters}
     test_seqs = {seq_dict[seq_id] for seq_id in test_clusters}
 
     logger.info(f"Train sequences: {len(train_seqs)}")
     logger.info(f"Test sequences: {len(test_seqs)}")
-
     return train_seqs, test_seqs
 
 

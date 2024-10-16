@@ -9,6 +9,7 @@ from plm_interpretability.logistic_regression_probe.utils import (
     Example,
     get_annotation_entries_for_class,
     make_examples_from_annotation_entries,
+    train_test_split_by_homology,
 )
 
 
@@ -123,3 +124,32 @@ class TestUtils(unittest.TestCase):
 
         result = get_annotation_entries_for_class(mock_df, annotation, "Non-existent")
         self.assertEqual(len(result), 0)
+
+    def test_train_test_split_by_homology(self):
+        sequences = [
+            # 2 similar sequences that should be clustered together
+            "MSPGNTTVVTTTVRNATPSLALDAGTIERFLAHSHRRRYPTRTDVFRPGDPAGTLYYVIS",
+            "MSPGNTTTVTTTVRNATPSLALDAGTIERFLAHSHRRRYPTRTDVFRPGDPAGALYYVIS",
+            # A couple of dissimilar sequences
+            "MIPEKRIIRRIQSGGCAIHCQDCSISQLCIPFTLNEHELDQLDNIIERKKPIQKGQTLFKAGDELKSLYAIRSGTIKSYTITE"
+            "LVERSLKQLFRQQTGMSISHYLRQIRLCHAKCLLRGSEHRISDIAARCGFEDSNYFSAVFTREAGMTPRDYRQRFIRSPVLPTKNEP",
+            "IQQLAQESRKTDSWSIQLTEVLLLQLAIVLKRHRYRAEQAHLLPDGEQLDLIMSALQQSLGAYFDMANFCHKNQ",
+            "PSERELMAFFNVGRPSVREALAALKRKGLVQINNGERARVSRPSADTIISELSGLAKDFL",
+        ]
+
+        train_seqs, test_seqs = train_test_split_by_homology(
+            sequences=sequences,
+            max_seqs=4,
+            test_ratio=0.2,
+            similarity_threshold=0.4,
+        )
+
+        filtered_seqs = train_seqs | test_seqs
+        self.assertEqual(len(filtered_seqs), 4)
+
+        # One of the first 2 seqs should be filtered out because of homology
+        self.assertTrue(sequences[0] not in filtered_seqs or sequences[1] not in filtered_seqs)
+
+        # 0.2 test ratio, max 4 seqs -> 1 test seq, 3 train seqs
+        self.assertEqual(len(train_seqs), 3)
+        self.assertEqual(len(test_seqs), 1)
