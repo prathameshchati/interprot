@@ -128,7 +128,7 @@ def get_sae_acts(
     plm_model: EsmModel,
     sae_model: SparseAutoencoder,
     plm_layer: int,
-) -> np.ndarray[float]:
+) -> np.ndarray[np.float32, np.float32]:
     """
     Returns a (len(seq), sae_dim) array of SAE activations.
     """
@@ -183,6 +183,7 @@ def make_examples_from_annotation_entries(
     plm_model: EsmModel,
     sae_model: SparseAutoencoder,
     plm_layer: int,
+    pool_over_annotation: bool = False,
 ) -> list[Example]:
     """
     Given a dict like this:
@@ -212,16 +213,10 @@ def make_examples_from_annotation_entries(
     ```
     """
     examples = []
-    num_positive_examples = 0
     for seq, entries in tqdm(
         seq_to_annotation_entries.items(),
         desc="Running ESM -> SAE inference",
     ):
-        positive_positions = set()
-        for e in entries:
-            for i in range(e["start"] - 1, e["end"]):  # Swissprot is 1-indexed
-                positive_positions.add(i)
-
         sae_acts = get_sae_acts(
             seq=seq,
             tokenizer=tokenizer,
@@ -230,16 +225,57 @@ def make_examples_from_annotation_entries(
             plm_layer=plm_layer,
         )
 
-        for i, pos_sae_acts in enumerate(sae_acts):
-            examples.append(
-                Example(
-                    sae_acts=pos_sae_acts,
-                    target=i in positive_positions,
+        if pool_over_annotation:
+            for e in entries:
+                start = e["start"] - 1
+                end = e["end"]
+                annotation_length = end - start
+                examples.append(
+                    Example(
+                        sae_acts=np.mean(sae_acts[start:end], axis=0),
+                        target=True,
+                    )
                 )
-            )
-            if i in positive_positions:
-                num_positive_examples += 1
 
+                # Sample 1-2 random annotations with the same length as the positive annotation
+                # that don't overlap with the positive annotation as negative examples.
+                if start > annotation_length:
+                    random_start_on_left = random.randint(0, start - annotation_length)
+                    random_end_on_left = random_start_on_left + annotation_length
+                    examples.append(
+                        Example(
+                            sae_acts=np.mean(
+                                sae_acts[random_start_on_left:random_end_on_left], axis=0
+                            ),
+                            target=False,
+                        )
+                    )
+                if end < len(sae_acts) - annotation_length:
+                    random_start_on_right = random.randint(end, len(sae_acts) - annotation_length)
+                    random_end_on_right = random_start_on_right + annotation_length
+                    examples.append(
+                        Example(
+                            sae_acts=np.mean(
+                                sae_acts[random_start_on_right:random_end_on_right], axis=0
+                            ),
+                            target=False,
+                        )
+                    )
+        else:
+            positive_positions = set()
+            for e in entries:
+                for i in range(e["start"] - 1, e["end"]):  # Swissprot is 1-indexed
+                    positive_positions.add(i)
+
+            for i, pos_sae_acts in enumerate(sae_acts):
+                examples.append(
+                    Example(
+                        sae_acts=pos_sae_acts,
+                        target=i in positive_positions,
+                    )
+                )
+
+    num_positive_examples = sum(e.target for e in examples)
     logger.info(f"Made {len(examples)} examples ({num_positive_examples} positive)")
     return examples
 
@@ -253,6 +289,7 @@ def prepare_arrays_for_logistic_regression(
     plm_model: EsmModel,
     sae_model: SparseAutoencoder,
     plm_layer: int,
+    pool_over_annotation: bool,
 ) -> tuple[np.ndarray[float], np.ndarray[float], np.ndarray[float], np.ndarray[float]]:
     """
     Given the swissprot dataframe and the desired annotation and class, creates examples that
@@ -284,6 +321,7 @@ def prepare_arrays_for_logistic_regression(
         plm_model=plm_model,
         sae_model=sae_model,
         plm_layer=plm_layer,
+        pool_over_annotation=pool_over_annotation,
     )
     test_examples = make_examples_from_annotation_entries(
         seq_to_annotation_entries=test_seq_to_annotation_entries,
@@ -291,6 +329,7 @@ def prepare_arrays_for_logistic_regression(
         plm_model=plm_model,
         sae_model=sae_model,
         plm_layer=plm_layer,
+        pool_over_annotation=pool_over_annotation,
     )
 
     X_train = np.array([e.sae_acts for e in train_examples], dtype="float32")

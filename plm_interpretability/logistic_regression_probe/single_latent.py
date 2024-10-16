@@ -88,6 +88,12 @@ def run_logistic_regression_on_latent(
     help="List of annotation names to process. If not provided, all annotations will be processed.",
 )
 @click.option(
+    "--pool-over-annotation",
+    type=bool,
+    default=False,
+    help="Whether to mean pool SAE activations over the entire annotation",
+)
+@click.option(
     "--max-seqs-per-task",
     type=int,
     default=1000,
@@ -101,6 +107,7 @@ def single_latent(
     swissprot_tsv: str,
     output_dir: str,
     annotation_names: list[str],
+    pool_over_annotation: bool,
     max_seqs_per_task: int,
 ):
     """
@@ -144,6 +151,7 @@ def single_latent(
                 plm_model=plm_model,
                 sae_model=sae_model,
                 plm_layer=plm_layer,
+                pool_over_annotation=pool_over_annotation,
             )
             with warnings.catch_warnings():
                 # LogisticRegression throws warnings when it can't converge.
@@ -180,17 +188,14 @@ def single_latent(
                     X_test_mmap.flush()
                     y_test_mmap.flush()
 
-                    shape_train = X_train.shape
-                    shape_test = X_test.shape
-
                     run_func = functools.partial(
                         run_logistic_regression_on_latent,
                         X_train_filename=X_train_filename,
                         y_train_filename=y_train_filename,
                         X_test_filename=X_test_filename,
                         y_test_filename=y_test_filename,
-                        shape_train=shape_train,
-                        shape_test=shape_test,
+                        shape_train=X_train.shape,
+                        shape_test=X_test.shape,
                     )
 
                     with Pool() as pool:
