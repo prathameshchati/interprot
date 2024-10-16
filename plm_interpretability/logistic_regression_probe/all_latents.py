@@ -127,11 +127,17 @@ def all_latents(
                 recall = recall_score(y_test, y_pred)
                 f1 = f1_score(y_test, y_pred)
 
-                logger.info(f"Results: {precision}, {recall}, {f1}")
-                res_rows.append((annotation.name, class_name, precision, recall, f1))
+                logger.info(f"Precision: {precision}, Recall: {recall}, F1: {f1}")
+
+                weights = model.coef_[0]
+                res_rows.append(
+                    [annotation.name, class_name, precision, recall, f1] + weights.tolist()
+                )
 
             res_df = pd.DataFrame(
-                res_rows, columns=["annotation", "class", "precision", "recall", "f1"]
+                res_rows,
+                columns=["annotation", "class", "precision", "recall", "f1"]
+                + [f"weight_{i}" for i in range(sae_dim)],
             )
             res_df.to_csv(output_file, index=False)
             logger.info(f"Results saved to {output_file}")
