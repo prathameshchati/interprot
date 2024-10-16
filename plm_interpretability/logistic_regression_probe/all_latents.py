@@ -100,6 +100,7 @@ def all_latents(
                 plm_model=plm_model,
                 sae_model=sae_model,
                 plm_layer=plm_layer,
+                pool_over_annotation=False,
             )
             with warnings.catch_warnings():
                 # LogisticRegression throws warnings when it can't converge.
