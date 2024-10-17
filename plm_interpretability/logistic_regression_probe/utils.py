@@ -103,6 +103,7 @@ def train_test_split_by_homology(
                 "1",
             ],
             check=True,
+            stdout=subprocess.DEVNULL,  # Suppress printouts
         )
 
         clusters = parse_mmseqs2_clusters(f"{output_prefix}_cluster.tsv")

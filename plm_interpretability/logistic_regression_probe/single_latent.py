@@ -25,6 +25,19 @@ from plm_interpretability.logistic_regression_probe.utils import (
 from plm_interpretability.sae_model import SparseAutoencoder
 
 
+def augment_df_with_aa_identity(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Augment the dataframe with amino acid identity.
+    """
+    for _, row in df.iterrows():
+        annotation_strs = []
+        seq = row["Sequence"]
+        for i, aa in enumerate(seq):
+            annotation_strs.append(f'AA_IDENTITY {i+1}; /note="{aa}"')
+        row["Amino acid identity"] = "; ".join(annotation_strs)
+    return df
+
+
 def run_logistic_regression_on_latent(
     dim: int,
     X_train_filename: str,
@@ -132,6 +145,9 @@ def single_latent(
     for annotation in RESIDUE_ANNOTATIONS:
         if annotation_names and annotation.name not in annotation_names:
             continue
+
+        if annotation.name == "Amino acid identity":
+            df = augment_df_with_aa_identity(df)
 
         logger.info(f"Processing annotation: {annotation.name}")
         os.makedirs(os.path.join(output_dir, annotation.name), exist_ok=True)

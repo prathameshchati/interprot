@@ -106,5 +106,31 @@ RESIDUE_ANNOTATIONS = [
         swissprot_header="REGION",
         class_names=["Disordered", "Interaction with tRNA"],  # TODO: Add more
     ),
+    ResidueAnnotation(
+        name="Amino acid identity",
+        swissprot_header="AA_IDENTITY",
+        class_names=[
+            "A",
+            "R",
+            "N",
+            "D",
+            "C",
+            "Q",
+            "E",
+            "G",
+            "H",
+            "I",
+            "L",
+            "K",
+            "M",
+            "F",
+            "P",
+            "S",
+            "T",
+            "W",
+            "Y",
+            "V",
+        ],
+    ),
 ]
 RESIDUE_ANNOTATION_NAMES = {a.name for a in RESIDUE_ANNOTATIONS}
