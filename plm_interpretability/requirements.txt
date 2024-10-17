@@ -1,6 +1,7 @@
 tqdm
 numpy
 torch
+fair-esm
 wandb
 pandas
 transformers
