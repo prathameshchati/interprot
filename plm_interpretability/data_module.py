@@ -13,7 +13,7 @@ class PolarsDataset(Dataset):
 
     def __getitem__(self, idx):
         row = self.df.row(idx, named=True)
-        return {"Sequence": row["Sequence"], "Entry": row["Entry"]}
+        return {"Sequence": row["sequence"], "Entry": row["id"]}
 
 # Data Module
 class SequenceDataModule(pl.LightningDataModule):
