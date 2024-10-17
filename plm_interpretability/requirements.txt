@@ -1,0 +1,8 @@
+tqdm
+numpy
+torch
+wandb
+pandas
+transformers
+polars
+lightning
