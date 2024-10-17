@@ -81,5 +81,30 @@ RESIDUE_ANNOTATIONS = [
         swissprot_header="TRANSIT",
         class_names=[ResidueAnnotation.ALL_CLASSES, "Mitochondrion", "Chloroplast"],
     ),
+    ResidueAnnotation(
+        name="Helix",
+        swissprot_header="HELIX",
+        class_names=[ResidueAnnotation.ALL_CLASSES],
+    ),
+    ResidueAnnotation(
+        name="Beta strand",
+        swissprot_header="STRAND",
+        class_names=[ResidueAnnotation.ALL_CLASSES],
+    ),
+    ResidueAnnotation(
+        name="Turn",
+        swissprot_header="TURN",
+        class_names=[ResidueAnnotation.ALL_CLASSES],
+    ),
+    ResidueAnnotation(
+        name="Coiled coil",
+        swissprot_header="COILED",
+        class_names=[ResidueAnnotation.ALL_CLASSES],
+    ),
+    ResidueAnnotation(
+        name="Region",
+        swissprot_header="REGION",
+        class_names=["Disordered", "Interaction with tRNA"],  # TODO: Add more
+    ),
 ]
 RESIDUE_ANNOTATION_NAMES = {a.name for a in RESIDUE_ANNOTATIONS}
