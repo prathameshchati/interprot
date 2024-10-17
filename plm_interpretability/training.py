@@ -15,11 +15,11 @@ parser.add_argument('--esm2-weight', type=str, default='weights/esm2_t33_650M_UR
 parser.add_argument('-l', '--layer-to_use', type=int, default=24)
 parser.add_argument('--d-model', type=int, default=1280)
 parser.add_argument('--d-hidden', type=int, default=32768)
-parser.add_argument('-b', '--batch-size', type=int, default=64)
-parser.add_argument('--lr', type=float, default=2e-3)
+parser.add_argument('-b', '--batch-size', type=int, default=4)
+parser.add_argument('--lr', type=float, default=2e-4)
 parser.add_argument('--k', type=int, default=128)
 parser.add_argument('--dead-steps-threshold', type=int, default=2000)
-parser.add_argument('-e', '--max-epochs', type=int, default=1)
+parser.add_argument('-e', '--max-epochs', type=int, default=4)
 parser.add_argument('-d', '--num-devices', type=int, default=1)
 
 args = parser.parse_args()
@@ -29,8 +29,8 @@ args.output_dir = f"results_l{args.layer_to_use}_dim{args.d_hidden}_k{args.k}"
 if not os.path.exists(args.output_dir):
     os.mkdir(args.output_dir)
     
-wandb_logger = WandbLogger(project="interpretability_test", 
-                           name="sae_opt",
+wandb_logger = WandbLogger(project="interpretability", 
+                           name=f"sae_train_l{args.layer_to_use}_dim{args.d_hidden}_k{args.k}",
                            save_dir=os.path.join(args.output_dir, 'wandb'))
 
 # Initialize model and data module
