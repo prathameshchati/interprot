@@ -7,7 +7,8 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from transformers import PreTrainedModel, PreTrainedTokenizer
-from utils import get_layer_activations
+
+from plm_interpretability.utils import get_layer_activations
 
 
 class SparseAutoencoder(nn.Module):
