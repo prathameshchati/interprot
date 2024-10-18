@@ -34,7 +34,7 @@ logistic_regression_probe = "plm_interpretability.logistic_regression_probe.__ma
 Homepage = "https://github.com/etowahadams/plm-interpretability"
 
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.build-meta]
