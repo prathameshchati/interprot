@@ -12,9 +12,10 @@ pnpm run dev
 
 ## The python package
 
-### Docker setup
+### Set up Docker container and run tests
 
 ```bash
 docker compose build
 docker compose run --rm plm-interpretability bash
+pytest
 ```
