@@ -75,8 +75,8 @@ def extract_sequences(
 def train_test_split_by_homology(
     sequences: list[str],
     max_seqs: int,
-    test_ratio: float = 0.1,
-    similarity_threshold: float = 0.4,
+    test_ratio: float = 0.2,
+    similarity_threshold: float = 0.3,
 ) -> tuple[set[str], set[str]]:
     """
     Given a list of sequences and a max_seqs cutoff:
@@ -240,7 +240,7 @@ def make_examples_from_annotation_entries(
 
                 # Sample 1-2 random annotations with the same length as the positive annotation
                 # that don't overlap with the positive annotation as negative examples.
-                if start > annotation_length:
+                if start >= annotation_length:
                     random_start_on_left = random.randint(0, start - annotation_length)
                     random_end_on_left = random_start_on_left + annotation_length
                     examples.append(
@@ -251,8 +251,8 @@ def make_examples_from_annotation_entries(
                             target=False,
                         )
                     )
-                if end < len(sae_acts) - annotation_length:
-                    random_start_on_right = random.randint(end, len(sae_acts) - annotation_length)
+                if end < len(seq) - annotation_length:
+                    random_start_on_right = random.randint(end, len(seq) - annotation_length)
                     random_end_on_right = random_start_on_right + annotation_length
                     examples.append(
                         Example(

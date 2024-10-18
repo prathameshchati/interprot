@@ -86,6 +86,70 @@ class TestUtils(unittest.TestCase):
             plm_layer=24,
         )
 
+    @patch("plm_interpretability.logistic_regression_probe.utils.get_sae_acts")
+    def test_make_examples_from_annotation_entries_pool_over_annotation(self, mock_get_sae_acts):
+        seq_to_annotation_entries = {
+            "AAAAAAAAAA": [{"start": 4, "end": 6}],
+            "CCCCCCCCCC": [{"start": 1, "end": 3}, {"start": 5, "end": 6}],
+        }
+
+        mock_tokenizer = Mock()
+        mock_plm_model = Mock()
+        mock_sae_model = Mock()
+
+        mock_get_sae_acts.side_effect = [
+            [
+                [0.1, 0.2],
+                [0.3, 0.4],
+                [0.5, 0.6],
+                [0.7, 0.8],
+                [0.9, 1.0],
+                [1.1, 1.2],
+                [1.3, 1.4],
+                [1.5, 1.6],
+                [1.7, 1.8],
+                [1.9, 2.0],
+            ],
+            [
+                [2.1, 2.2],
+                [2.3, 2.4],
+                [2.5, 2.6],
+                [2.7, 2.8],
+                [2.9, 3.0],
+                [3.1, 3.2],
+                [3.3, 3.4],
+                [3.5, 3.6],
+                [3.7, 3.8],
+                [3.9, 4.0],
+            ],
+        ]
+
+        examples = make_examples_from_annotation_entries(
+            seq_to_annotation_entries,
+            mock_tokenizer,
+            mock_plm_model,
+            mock_sae_model,
+            plm_layer=24,
+            pool_over_annotation=True,
+        )
+        print(examples)
+
+        self.assertEqual(len(examples), 8)
+
+        self.assertIn(
+            Example(sae_acts=np.mean([[0.7, 0.8], [0.9, 1.0], [1.1, 1.2]], axis=0), target=True),
+            examples,
+        )
+        self.assertIn(
+            Example(sae_acts=np.mean([[2.1, 2.2], [2.3, 2.4], [2.5, 2.6]], axis=0), target=True),
+            examples,
+        )
+        self.assertIn(
+            Example(sae_acts=np.mean([[2.9, 3.0], [3.1, 3.2]], axis=0), target=True),
+            examples,
+        )
+        self.assertEqual(len([e for e in examples if e.target is False]), 5)
+
     def test_get_annotation_entries_for_class(self):
         mock_df = pd.DataFrame(
             {
