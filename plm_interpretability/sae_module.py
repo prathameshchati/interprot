@@ -12,7 +12,14 @@ class SAELightningModule(pl.LightningModule):
         self.save_hyperparameters()
         self.args = args
         self.layer_to_use = args.layer_to_use
-        self.sae_model = SparseAutoencoder(args.d_model, args.d_hidden)
+        self.sae_model = SparseAutoencoder(
+            d_model=args.d_model,
+            d_hidden=args.d_hidden,
+            k=args.k,
+            auxk=args.auxk,
+            batch_size=args.batch_size,
+            dead_steps_threshold=args.dead_steps_threshold,
+        )
         self.alphabet = esm.data.Alphabet.from_architecture("ESM-1b")
         esm2_model = ESM2Model(
             num_layers=33,
