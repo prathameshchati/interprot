@@ -14,15 +14,21 @@ dependencies = [
     "numpy<2",
     "scikit-learn",
     "tqdm",
+    "pandas",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
 
 [tool.setuptools]
-packages = ["plm_interpretability", "plm_interpretability.autointerp"]
+packages = [
+    "plm_interpretability",
+    "plm_interpretability.autointerp",
+    "plm_interpretability.logistic_regression_probe"
+]
 
 [project.scripts]
 autointerp = "plm_interpretability.autointerp.__main__:cli"
+logistic_regression_probe = "plm_interpretability.logistic_regression_probe.__main__:cli"
 
 [project.urls]
 Homepage = "https://github.com/etowahadams/plm-interpretability"
@@ -32,7 +38,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 target-version = "py310"
 
 [tool.ruff.lint]
@@ -44,3 +50,8 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
