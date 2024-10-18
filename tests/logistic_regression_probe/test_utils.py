@@ -132,8 +132,8 @@ class TestUtils(unittest.TestCase):
             plm_layer=24,
             pool_over_annotation=True,
         )
-        print(examples)
 
+        # 8 examples: 3 positive, 5 negative
         self.assertEqual(len(examples), 8)
 
         self.assertIn(
