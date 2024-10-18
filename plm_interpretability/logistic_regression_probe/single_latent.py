@@ -146,6 +146,8 @@ def single_latent(
             continue
 
         if annotation.name == "Amino acid identity":
+            if pool_over_annotation:
+                continue
             df = augment_df_with_aa_identity(df)
 
         logger.info(f"Processing annotation: {annotation.name}")
