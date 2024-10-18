@@ -25,6 +25,7 @@ packages = [
     "plm_interpretability.autointerp",
     "plm_interpretability.logistic_regression_probe"
 ]
+editable-backend = "editables"
 
 [project.scripts]
 autointerp = "plm_interpretability.autointerp.__main__:cli"
@@ -34,7 +35,7 @@ logistic_regression_probe = "plm_interpretability.logistic_regression_probe.__ma
 Homepage = "https://github.com/etowahadams/plm-interpretability"
 
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
+requires = ["setuptools>=64.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.build-meta]
