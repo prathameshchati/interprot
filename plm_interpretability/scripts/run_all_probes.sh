@@ -44,7 +44,7 @@ logistic_regression_probe single-latent \
     --plm-dim 1280 \
     --plm-layer $plm_layer \
     --swissprot-tsv swissprot_full_annotations.tsv \
-    --output-dir single_latent_single_residue
+    --output-dir $output_dir/single_latent_single_residue
 
 logistic_regression_probe single-latent \
     --sae-checkpoint $checkpoint_file \
@@ -53,7 +53,7 @@ logistic_regression_probe single-latent \
     --plm-layer $plm_layer \
     --swissprot-tsv swissprot_full_annotations.tsv \
     --pool-over-annotation True \
-    --output-dir single_latent_pool_over_annotation
+    --output-dir $output_dir/single_latent_pool_over_annotation
 
 logistic_regression_probe all-latents \
     --sae-checkpoint $checkpoint_file \
@@ -61,7 +61,6 @@ logistic_regression_probe all-latents \
     --plm-dim 1280 \
     --plm-layer $plm_layer \
     --swissprot-tsv swissprot_full_annotations.tsv \
-    --pool-over-annotation True \
-    --output-dir all_latents
+    --output-dir $output_dir/all_latents
 
 echo "Finished running all probes. Results saved in $output_dir"
