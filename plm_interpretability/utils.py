@@ -81,9 +81,7 @@ def train_val_test_split(
     seqs_train = df.filter(is_train)
     seqs_val_test = df.filter(~is_train)
 
-    is_val = pl.Series(
-        np.random.choice([True, False], size=len(seqs_val_test), p=[0.1, 0.9])
-    )
+    is_val = pl.Series(np.random.choice([True, False], size=len(seqs_val_test), p=[0.1, 0.9]))
     seqs_val = seqs_val_test.filter(is_val)
     seqs_test = seqs_val_test.filter(~is_val)
     return seqs_train, seqs_val, seqs_test

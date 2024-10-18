@@ -141,9 +141,7 @@ def get_matching_seqs(
     required=True,
     help="Secondary structure patterns to match",
 )
-@click.option(
-    "--out-path", type=str, required=True, help="Path to save the output CSV file"
-)
+@click.option("--out-path", type=str, required=True, help="Path to save the output CSV file")
 @click.option(
     "--max-seqs",
     type=int,

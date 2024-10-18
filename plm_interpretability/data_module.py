@@ -1,8 +1,9 @@
-import torch 
 import polars as pr
 import pytorch_lightning as pl
+import torch
 from torch.utils.data import Dataset
-from utils import train_val_test_split 
+from utils import train_val_test_split
+
 
 class PolarsDataset(Dataset):
     def __init__(self, df):
@@ -14,6 +15,7 @@ class PolarsDataset(Dataset):
     def __getitem__(self, idx):
         row = self.df.row(idx, named=True)
         return {"Sequence": row["sequence"], "Entry": row["id"]}
+
 
 # Data Module
 class SequenceDataModule(pl.LightningDataModule):
@@ -27,10 +29,14 @@ class SequenceDataModule(pl.LightningDataModule):
         self.train_data, self.val_data, self.test_data = train_val_test_split(df)
 
     def train_dataloader(self):
-        return torch.utils.data.DataLoader(PolarsDataset(self.train_data), batch_size=self.batch_size, shuffle=True)
+        return torch.utils.data.DataLoader(
+            PolarsDataset(self.train_data), batch_size=self.batch_size, shuffle=True
+        )
 
     def val_dataloader(self):
         return torch.utils.data.DataLoader(PolarsDataset(self.val_data), batch_size=self.batch_size)
 
     def test_dataloader(self):
-        return torch.utils.data.DataLoader(PolarsDataset(self.test_data), batch_size=self.batch_size)
+        return torch.utils.data.DataLoader(
+            PolarsDataset(self.test_data), batch_size=self.batch_size
+        )

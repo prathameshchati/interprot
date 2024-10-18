@@ -1,7 +1,8 @@
-import torch
-import torch.nn as nn 
 import pytorch_lightning as pl
+import torch
+import torch.nn as nn
 from esm.modules import ESM1bLayerNorm, RobertaLMHead, TransformerLayer
+
 
 class ESM2Model(pl.LightningModule):
     def __init__(self, num_layers, embed_dim, attention_heads, alphabet, token_dropout):
@@ -50,32 +51,32 @@ class ESM2Model(pl.LightningModule):
             output_dim=self.alphabet_size,
             weight=self.embed_tokens.weight,
         )
-        
+
     def load_esm_ckpt(self, esm_pretrained):
         ckpt = {}
         model_data = torch.load(esm_pretrained)["model"]
         for k in model_data:
-            if 'lm_head' in k:
-                ckpt[k.replace('encoder.','')] = model_data[k]
+            if "lm_head" in k:
+                ckpt[k.replace("encoder.", "")] = model_data[k]
             else:
-                ckpt[k.replace('encoder.sentence_encoder.','')] = model_data[k]
+                ckpt[k.replace("encoder.sentence_encoder.", "")] = model_data[k]
         self.load_state_dict(ckpt)
-        
+
     def compose_input(self, list_tuple_seq):
         _, _, batch_tokens = self.batch_converter(list_tuple_seq)
         batch_tokens = batch_tokens.to(self.device)
-        return batch_tokens 
-    
+        return batch_tokens
+
     def get_layer_activations(self, input, layer_idx):
         if isinstance(input, str):
-            tokens = self.compose_input([('protein', input)])
+            tokens = self.compose_input([("protein", input)])
         elif isinstance(input, list):
-            tokens = self.compose_input([('protein', seq) for seq in input])
+            tokens = self.compose_input([("protein", seq) for seq in input])
         else:
             tokens = input
-            
+
         x = self.embed_scale * self.embed_tokens(tokens)
-        x = x.transpose(0, 1) # (B, T, E) => (T, B, E)
+        x = x.transpose(0, 1)  # (B, T, E) => (T, B, E)
         for _, layer in enumerate(self.layers[:layer_idx]):
             x, attn = layer(
                 x,
@@ -83,9 +84,9 @@ class ESM2Model(pl.LightningModule):
                 need_head_weights=False,
             )
         return tokens, x.transpose(0, 1)
-    
+
     def get_sequence(self, x, layer_idx):
-        x = x.transpose(0, 1) # (B, T, E) => (T, B, E)
+        x = x.transpose(0, 1)  # (B, T, E) => (T, B, E)
         for _, layer in enumerate(self.layers[layer_idx:]):
             x, attn = layer(
                 x,

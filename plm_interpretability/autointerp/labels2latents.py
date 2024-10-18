@@ -73,8 +73,7 @@ def compute_scores_matrix(
             negative_acts_var = negative_acts.var().item()
 
             score = (positive_acts_mean - negative_acts_mean) / math.sqrt(
-                positive_acts_var / len(positive_acts)
-                + negative_acts_var / len(negative_acts)
+                positive_acts_var / len(positive_acts) + negative_acts_var / len(negative_acts)
             )
             scores[seq_idx, dim_idx] = score
 
@@ -94,12 +93,8 @@ def compute_scores_matrix(
     required=True,
     help="Path to the SAE checkpoint file",
 )
-@click.option(
-    "--plm-dim", type=int, required=True, help="Dimension of the protein language model"
-)
-@click.option(
-    "--sae-dim", type=int, required=True, help="Dimension of the sparse autoencoder"
-)
+@click.option("--plm-dim", type=int, required=True, help="Dimension of the protein language model")
+@click.option("--sae-dim", type=int, required=True, help="Dimension of the sparse autoencoder")
 @click.option(
     "--plm-layer",
     type=int,
@@ -112,9 +107,7 @@ def compute_scores_matrix(
     required=True,
     help="Path to save the output CSV file",
 )
-@click.option(
-    "--max-seqs", type=int, default=100, help="Maximum number of sequences to process"
-)
+@click.option("--max-seqs", type=int, default=100, help="Maximum number of sequences to process")
 def labels2latents(
     labels_csv: TextIO,
     sae_checkpoint: str,

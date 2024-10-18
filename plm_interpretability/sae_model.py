@@ -7,7 +7,6 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from transformers import PreTrainedModel, PreTrainedTokenizer
-
 from utils import get_layer_activations
 
 
@@ -58,9 +57,7 @@ class SparseAutoencoder(nn.Module):
 
         # Initialize dead neuron tracking. For each hidden dimension, save the
         # index of the example at which it was last activated.
-        self.register_buffer(
-            "stats_last_nonzero", torch.zeros(d_hidden, dtype=torch.long)
-        )
+        self.register_buffer("stats_last_nonzero", torch.zeros(d_hidden, dtype=torch.long))
 
     def topK_activation(self, x: torch.Tensor, k: int) -> torch.Tensor:
         """
@@ -121,9 +118,7 @@ class SparseAutoencoder(nn.Module):
         dead_mask = self.stats_last_nonzero > self.dead_steps_threshold
         return dead_mask
 
-    def forward(
-        self, x: torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Forward pass of the Sparse Autoencoder. If there are dead neurons, compute the
         reconstruction using the AUXK auxiliary hidden dims as well.
@@ -230,14 +225,14 @@ class SparseAutoencoder(nn.Module):
         pre_acts = x @ self.w_enc + self.b_enc
         latents = self.topK_activation(pre_acts, self.k)
         return latents
-    
+
     @torch.no_grad()
     def encode(self, x: torch.Tensor) -> torch.Tensor:
         x, mu, std = self.LN(x)
         x = x - self.b_pre
         acts = x @ self.w_enc + self.b_enc
-        return acts, mu, std 
-    
+        return acts, mu, std
+
     @torch.no_grad()
     def decode(self, acts: torch.Tensor, mu: torch.Tensor, std: torch.Tensor) -> torch.Tensor:
         latents = self.topK_activation(acts, self.k)
@@ -298,9 +293,7 @@ def estimate_loss(
     samples = examples_set.sample(sample_size)
     test_losses = []
     seqs = [row["Sequence"] for row in samples.iter_rows(named=True)]
-    layer_acts = get_layer_activations(
-        tokenizer=tokenizer, plm=plm, seqs=seqs, layer=layer
-    )
+    layer_acts = get_layer_activations(tokenizer=tokenizer, plm=plm, seqs=seqs, layer=layer)
 
     recons = sae_model.forward_val(layer_acts)
     mse_loss, _ = loss_fn(layer_acts, recons)
