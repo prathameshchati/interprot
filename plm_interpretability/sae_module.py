@@ -20,6 +20,7 @@ def get_esm_model(d_model, alphabet, esm2_weight):
     esm2_model.eval()
     for param in esm2_model.parameters():
         param.requires_grad = False
+    esm2_model.cuda()
     
     return esm2_model
 
