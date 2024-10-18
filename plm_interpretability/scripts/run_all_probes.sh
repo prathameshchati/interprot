@@ -61,6 +61,6 @@ logistic_regression_probe all-latents \
     --plm-dim 1280 \
     --plm-layer $plm_layer \
     --swissprot-tsv swissprot_full_annotations.tsv \
-    --output-dir $output_dir/all_latents
+    --output-file $output_dir/all_latents.csv
 
 echo "Finished running all probes. Results saved in $output_dir"
