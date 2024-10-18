@@ -37,6 +37,9 @@ Homepage = "https://github.com/etowahadams/plm-interpretability"
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.build-meta]
+build-editable = "setuptools.build_meta:build_editable"
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"
