@@ -69,7 +69,6 @@ const token_dict = {
  * This component takes in a SingleSeq and renders the sequence with the corresponding colors
  */
 const SeqViewer: React.FC<SeqViewerProps> = ({ seq }) => {
-  console.log(seq);
   const maxValue = useMemo(() => {
     return Math.max(...seq.tokens_acts_list);
   }, [seq.tokens_acts_list]);
@@ -80,6 +79,7 @@ const SeqViewer: React.FC<SeqViewerProps> = ({ seq }) => {
         const color = redColorMap(seq.tokens_acts_list[index], maxValue);
         return (
           <span
+            key={`token-${index}`}
             style={{
               backgroundColor: color,
               borderRadius: 2,
