@@ -7,11 +7,19 @@ import "./App.css";
 // TODO: Filter this down to a curated, interesting set of dims
 const hiddenDims = Array.from({ length: 4096 }, (_, index) => index);
 
-const CONFIG: { baseUrl: string; hiddenDims: number[] } = {
+const CONFIG: { baseUrl: string; hiddenDims: number[], curated?: {name: string, dim: number, desc: string}[] } = {
   baseUrl:
     "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l24_sae4096_100Kseqs/",
   hiddenDims: hiddenDims,
+  curated: [
+    {name: "free alpha helices", dim: 2293, desc: "Activates on every fourth amino acid in free alpha helices"},
+    {name: "single beta sheet", dim: 1299, desc: "Activates on a single beta sheet"},
+    {name: "beta sheet: first aa", dim: 782, desc: "Activates on the first amino acid in beta sheets"},
+    {name: "leucine rich repeats", dim: 3425, desc: "Activates on the amino acid before the start of a beta sheet in a leucine rich repeat"},
+  ]
 };
+
+const dimToCuratedMap = new Map(CONFIG.curated?.map((i) => [i.dim, i]));
 
 function App() {
   const [feature, setFeature] = useState(() => {
@@ -92,6 +100,20 @@ function App() {
       >
         <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
           <ul className="space-y-2 font-medium">
+            {
+              CONFIG.curated?.map((i) => (
+                <li key={`feature-${i.dim}`}>
+                  <a
+                    onClick={() => setFeature(i.dim)}
+                    className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 cursor-pointer group ${
+                      feature === i.dim ? "font-bold" : ""
+                    }`}
+                  >
+                    <span className="ms-3">{i.name}</span>
+                  </a>
+                </li>
+              ))
+            }
             {CONFIG.hiddenDims.map((i) => (
               <li key={`feature-${i}`}>
                 <a
@@ -109,6 +131,9 @@ function App() {
       </aside>
       <div className="sm:ml-64 text-left">
         <h1 className="text-3xl font-bold">Feature: {feature}</h1>
+        {dimToCuratedMap.has(feature) && (
+          <p>{dimToCuratedMap.get(feature)?.desc}</p>
+        )}
         <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
           <div className="overflow-x-auto">
             {featureData.map((seq) => (
