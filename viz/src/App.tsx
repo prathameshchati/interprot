@@ -7,17 +7,31 @@ import "./App.css";
 // TODO: Filter this down to a curated, interesting set of dims
 const hiddenDims = Array.from({ length: 4096 }, (_, index) => index);
 
-const CONFIG: { baseUrl: string; hiddenDims: number[] } = {
+const CONFIG: { baseUrl: string; hiddenDims: number[], curated?: {name: string, dim: number, desc: string}[] } = {
   baseUrl:
     "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l24_sae4096_100Kseqs/",
   hiddenDims: hiddenDims,
+  curated: [
+    {name: "free alpha helices", dim: 2293, desc: "Activates on every fourth amino acid in free alpha helices"},
+    {name: "single beta sheet", dim: 1299, desc: "Activates on a single beta sheet"},
+    {name: "beta sheet: first aa", dim: 782, desc: "Activates on the first amino acid in beta sheets"},
+    {name: "leucine rich repeats", dim: 3425, desc: "Activates on the amino acid before the start of a beta sheet in a leucine rich repeat"},
+  ]
 };
+
+const dimToCuratedMap = new Map(CONFIG.curated?.map((i) => [i.dim, i]));
 
 function App() {
   const [feature, setFeature] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return parseInt(params.get("feature") || "0", 10);
   });
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+
+  // Step 2: Function to toggle the sidebar's visibility
+  const toggleSidebar = () => {
+    setSidebarOpen(!isSidebarOpen);
+  };
 
   useEffect(() => {
     const updateUrl = () => {
@@ -55,18 +69,56 @@ function App() {
   }, [feature]);
   return (
     <div>
+      <button
+        onClick={toggleSidebar}
+        aria-controls="default-sidebar"
+        type="button"
+        className="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+      >
+        <span className="sr-only">Open sidebar</span>
+        <svg
+          className="w-6 h-6"
+          aria-hidden="true"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            clip-rule="evenodd"
+            fill-rule="evenodd"
+            d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+          ></path>
+        </svg>
+      </button>
+
       <aside
-        className="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+        id="default-sidebar"
+        className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform transform ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } sm:translate-x-0`}
         aria-label="Sidebar"
       >
         <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
           <ul className="space-y-2 font-medium">
+            {
+              CONFIG.curated?.map((i) => (
+                <li key={`feature-${i.dim}`}>
+                  <a
+                    onClick={() => setFeature(i.dim)}
+                    className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 cursor-pointer group ${
+                      feature === i.dim ? "font-bold" : ""
+                    }`}
+                  >
+                    <span className="ms-3">{i.name}</span>
+                  </a>
+                </li>
+              ))
+            }
             {CONFIG.hiddenDims.map((i) => (
               <li key={`feature-${i}`}>
                 <a
-                
                   onClick={() => setFeature(i)}
-                  className={`flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group ${
+                  className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 cursor-pointer group ${
                     feature === i ? "font-bold" : ""
                   }`}
                 >
@@ -77,8 +129,11 @@ function App() {
           </ul>
         </div>
       </aside>
-      <div className="sm:ml-64">
-        <h1 className="text-3xl font-bold">{feature}</h1>
+      <div className="sm:ml-64 text-left">
+        <h1 className="text-3xl font-bold">Feature: {feature}</h1>
+        {dimToCuratedMap.has(feature) && (
+          <p>{dimToCuratedMap.get(feature)?.desc}</p>
+        )}
         <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
           <div className="overflow-x-auto">
             {featureData.map((seq) => (
