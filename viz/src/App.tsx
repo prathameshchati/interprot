@@ -4,7 +4,8 @@ import SeqViewer, { SingleSeq } from "./components/SeqViewer";
 
 import "./App.css";
 
-const hiddenDims = Array.from({ length: 300 }, (_, index) => index + 1000);
+// TODO: Filter this down to a curated, interesting set of dims
+const hiddenDims = Array.from({ length: 4096 }, (_, index) => index);
 
 const CONFIG: { baseUrl: string; hiddenDims: number[] } = {
   baseUrl:
@@ -13,7 +14,17 @@ const CONFIG: { baseUrl: string; hiddenDims: number[] } = {
 };
 
 function App() {
-  const [feature, setFeature] = useState(300);
+  const [feature, setFeature] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return parseInt(params.get("feature") || "0", 10);
+  });
+
+  useEffect(() => {
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set("feature", feature.toString());
+    window.history.pushState({}, "", newUrl);
+  }, [feature]);
+
   const [featureData, setFeatureData] = useState<SingleSeq[]>([]);
 
   useEffect(() => {
