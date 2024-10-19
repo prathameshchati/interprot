@@ -7,7 +7,7 @@ export interface SeqFormat {
   examples: SingleSeq[];
 }
 
-interface SingleSeq {
+export interface SingleSeq {
   alphafold_id: string;
   tokens_acts_list: Array<number>;
   tokens_list: Array<number>;

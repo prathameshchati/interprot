@@ -1,14 +1,31 @@
+import React, { useEffect, useState } from "react";
 import MolstarViewer from "./components/MolstarViewer";
-import SeqViewer from "./components/SeqViewer";
+import SeqViewer, { SingleSeq } from "./components/SeqViewer";
 
 import "./App.css";
-import React, { useState } from "react";
 
-import { data } from "./data";
+
+const hiddenDims = Array.from({ length: 300 }, (_, index) => index + 300);
+
+const CONFIG: {baseUrl: string, hiddenDims: number[]} = {
+  baseUrl: "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_650M_l24_sae4096_100Kseqs_test/",
+  hiddenDims: hiddenDims,
+}
+
 
 function App() {
-  const [feature, setFeature] = useState(0);
+  const [feature, setFeature] = useState(300);
+  const [featureData, setFeatureData] = useState<SingleSeq[]>([]);
 
+  useEffect(() => {
+    const fileURL = `${CONFIG.baseUrl}${feature}.txt`;
+    fetch(fileURL)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setFeatureData(data);
+      });
+  }, [feature]);
   return (
     <div>
       <aside
@@ -17,7 +34,7 @@ function App() {
       >
         <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
           <ul className="space-y-2 font-medium">
-            {data.map((seqInfo, i) => (
+            {CONFIG.hiddenDims.map((i) => (
               <li>
                 <a
                   href="#"
@@ -26,7 +43,7 @@ function App() {
                     feature === i ? "font-bold" : ""
                   }`}
                 >
-                  <span className="ms-3">{seqInfo.dimenstion}</span>
+                  <span className="ms-3">{i}</span>
                 </a>
               </li>
             ))}
@@ -34,11 +51,17 @@ function App() {
         </div>
       </aside>
       <div className="sm:ml-64">
-        <h1 className="text-3xl font-bold">{data[feature].dimenstion}</h1>
-
+        <h1 className="text-3xl font-bold">{feature}</h1>
+        <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
+          <div className="overflow-x-auto">
+            {featureData.map((seq) => (
+              <SeqViewer seq={seq} key={`seq-${seq.alphafold_id}`} />
+            ))}
+          </div>
+        </div>
         <div className="container mx-auto p-4">
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {data[feature].examples.map((seq) => (
+            {featureData.map((seq) => (
               <div className="bg-white rounded-lg flex items-center justify-center">
                 <MolstarViewer
                   key={`molstar-${seq.alphafold_id}`}
@@ -49,13 +72,7 @@ function App() {
             ))}
           </div>
         </div>
-        <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
-          <div className="overflow-x-auto">
-            {data[feature].examples.map((seq) => (
-              <SeqViewer seq={seq} key={`seq-${seq.alphafold_id}`} />
-            ))}
-          </div>
-        </div>
+        
       </div>
     </div>
   );
