@@ -4,25 +4,23 @@ import SeqViewer, { SingleSeq } from "./components/SeqViewer";
 
 import "./App.css";
 
+const hiddenDims = Array.from({ length: 300 }, (_, index) => index + 1000);
 
-const hiddenDims = Array.from({ length: 300 }, (_, index) => index + 300);
-
-const CONFIG: {baseUrl: string, hiddenDims: number[]} = {
-  baseUrl: "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_650M_l24_sae4096_100Kseqs_test/",
+const CONFIG: { baseUrl: string; hiddenDims: number[] } = {
+  baseUrl:
+    "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l24_sae4096_100Kseqs/",
   hiddenDims: hiddenDims,
-}
-
+};
 
 function App() {
   const [feature, setFeature] = useState(300);
   const [featureData, setFeatureData] = useState<SingleSeq[]>([]);
 
   useEffect(() => {
-    const fileURL = `${CONFIG.baseUrl}${feature}.txt`;
+    const fileURL = `${CONFIG.baseUrl}${feature}.json`;
     fetch(fileURL)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         setFeatureData(data);
       });
   }, [feature]);
@@ -72,7 +70,6 @@ function App() {
             ))}
           </div>
         </div>
-        
       </div>
     </div>
   );
