@@ -56,7 +56,7 @@ function App() {
   return (
     <div>
       <aside
-        className="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+        className="fixed top-0 left-0 z-40 w-48 h-screen transition-transform -translate-x-full sm:translate-x-0"
         aria-label="Sidebar"
       >
         <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
@@ -77,7 +77,7 @@ function App() {
           </ul>
         </div>
       </aside>
-      <div className="sm:ml-64">
+      <div className="sm:ml-48">
         <h1 className="text-3xl font-bold">{feature}</h1>
         <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
           <div className="overflow-x-auto">
