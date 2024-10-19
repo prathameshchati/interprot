@@ -10,10 +10,10 @@ import click
 import numpy as np
 import polars as pl
 import torch
+from sae_model import SparseAutoencoder
+from tqdm import tqdm
 from transformers import AutoTokenizer, EsmModel
-
-from plm_interpretability.sae_model import SparseAutoencoder
-from plm_interpretability.utils import get_layer_activations
+from utils import get_layer_activations
 
 
 class TopKHeap:
@@ -65,7 +65,9 @@ def make_viz_files(checkpoint_file: str, sequences_file: str):
     hidden_dim_to_seqs = {dim: TopKHeap(k=10) for dim in range(sae_dim)}
     # Read the sequences file
     df = pl.read_parquet(sequences_file)
-    for seq_idx, row in enumerate(df.iter_rows(named=True)):
+    for seq_idx, row in tqdm(
+        enumerate(df.iter_rows(named=True)), total=len(df), desc="Processing sequences"
+    ):
         seq = row["Sequence"]
 
         esm_layer_acts = get_layer_activations(
