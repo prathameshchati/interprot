@@ -20,9 +20,27 @@ function App() {
   });
 
   useEffect(() => {
-    const newUrl = new URL(window.location.href);
-    newUrl.searchParams.set("feature", feature.toString());
-    window.history.pushState({}, "", newUrl);
+    const updateUrl = () => {
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.set("feature", feature.toString());
+      window.history.pushState({}, "", newUrl);
+    };
+
+    updateUrl();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "ArrowDown") {
+        setFeature((prev) => Math.min(prev + 1, CONFIG.hiddenDims.length - 1));
+      } else if (event.key === "ArrowUp") {
+        setFeature((prev) => Math.max(prev - 1, 0));
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [feature]);
 
   const [featureData, setFeatureData] = useState<SingleSeq[]>([]);
@@ -46,7 +64,6 @@ function App() {
             {CONFIG.hiddenDims.map((i) => (
               <li>
                 <a
-                  href="#"
                   onClick={() => setFeature(i)}
                   className={`flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group ${
                     feature === i ? "font-bold" : ""

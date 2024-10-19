@@ -54,14 +54,13 @@ const MolstarViewer = ({
       const viewerContainer = document.getElementById(`viewer-${alphafold_id}`);
       viewerInstance.render(viewerContainer, options);
 
-      // Since we can't color the residues immediately, we'll wait for 3 seconds
-      // TODO: figure out how to listen to when the structure is loaded
-      setTimeout(() => {
+      // Listen for the 'load' event
+      viewerInstance.events.loadComplete.subscribe(() => {
         viewerInstance.visual.select({
           data: residueColor(activation_list),
           nonSelectedColor: "#ffffff",
         });
-      }, 3000);
+      });
     };
 
     // Check if the script is already loaded
@@ -90,13 +89,13 @@ const MolstarViewer = ({
 
   return (
     <div
-        id={`viewer-${alphafold_id}`}
-        style={{
-          width: "400px", // Width and height are required
-          height: "400px",
-          position: "relative",
-        }}
-      ></div>
+      id={`viewer-${alphafold_id}`}
+      style={{
+        width: "400px", // Width and height are required
+        height: "400px",
+        position: "relative",
+      }}
+    ></div>
   );
 };
 
