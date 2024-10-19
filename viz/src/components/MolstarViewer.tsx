@@ -94,11 +94,9 @@ const MolstarViewer = ({
     <div
         id={`viewer-${alphafold_id}`}
         style={{
-          float: "left",
-          width: "700px",
+          width: "400px", // Width and height are required
           height: "400px",
           position: "relative",
-          margin: "20px",
         }}
       ></div>
   );
