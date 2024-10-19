@@ -13,9 +13,12 @@ const CONFIG: { baseUrl: string; hiddenDims: number[], curated?: {name: string, 
   hiddenDims: hiddenDims,
   curated: [
     {name: "free alpha helices", dim: 2293, desc: "Activates on every fourth amino acid in free alpha helices"},
+    {name: "alpha helix turn", dim: 56, desc: "Activates on the turn between two alpha helices in ABC transporter proteins"},
     {name: "single beta sheet", dim: 1299, desc: "Activates on a single beta sheet"},
     {name: "beta sheet: first aa", dim: 782, desc: "Activates on the first amino acid in beta sheets"},
     {name: "leucine rich repeats", dim: 3425, desc: "Activates on the amino acid before the start of a beta sheet in a leucine rich repeat"},
+    {name: "start M", dim: 600, desc: "Activates on the M amino acid at the start of a sequence"},
+    {name: "second residue", dim: 3728, desc: "Mostly activates on the second amino acid in a sequence"},
   ]
 };
 
