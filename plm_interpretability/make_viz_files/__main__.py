@@ -2,8 +2,6 @@ import heapq
 import json
 import os
 import re
-import subprocess
-import tempfile
 from typing import Any
 
 import click
@@ -87,7 +85,7 @@ def make_viz_files(checkpoint_file: str, sequences_file: str):
     for dim in range(sae_dim):
         examples = [
             {
-                "tokens_acts_list": [round(act, 1) for act in sae_dim_acts],
+                "tokens_acts_list": [round(float(act), 1) for act in sae_dim_acts],
                 "tokens_list": tokenizer(df[seq_idx]["Sequence"].item())["input_ids"][1:-1],
                 "alphafold_id": df[seq_idx]["AlphaFoldDB"].item()[:-1],
             }
@@ -95,19 +93,13 @@ def make_viz_files(checkpoint_file: str, sequences_file: str):
         ]
         dim_to_examples[dim] = examples
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        os.chdir(temp_dir)
-        subprocess.run(["git", "clone", "https://github.com/liambai/plm-interp-viz-data.git"])
-        output_dir = os.path.join(temp_dir, "plm-interp-viz-data")
-        os.chdir(output_dir)
+    os.makedirs("viz_files", exist_ok=True)
+    output_dir_name = os.path.basename(checkpoint_file).split(".")[0]
+    os.makedirs(os.path.join("viz_files", output_dir_name), exist_ok=True)
 
-        for dim in range(sae_dim):
-            with open(f"{dim}.txt", "w") as f:
-                json.dump(dim_to_examples[dim], f)
-
-        subprocess.run(["git", "add", "."])
-        subprocess.run(["git", "commit", "-m", f"Add viz files for {checkpoint_file}"])
-        subprocess.run(["git", "push"])
+    for dim in range(sae_dim):
+        with open(os.path.join("viz_files", output_dir_name, f"{dim}.json"), "w") as f:
+            json.dump(dim_to_examples[dim], f)
 
 
 if __name__ == "__main__":
