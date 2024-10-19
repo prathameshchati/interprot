@@ -35,7 +35,7 @@ export function redColorMap(value: number, maxValue: number) {
   return `rgb(${red}, ${green}, ${blue})`;
 }
 
-const token_dict = {
+const token_dict: { [key: number]: string } = {
   4: "L",
   5: "A",
   6: "G",

@@ -71,6 +71,7 @@ const MolstarViewer = ({
       // Dynamically load the Molstar script if not already loaded
       script = document.createElement("script");
       script.id = scriptId;
+      // @ts-expect-error
       script.src =
         "https://cdn.jsdelivr.net/npm/pdbe-molstar@3.3.0/build/pdbe-molstar-plugin.js";
       script.onload = loadMolstarPlugin;
