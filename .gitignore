@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Python
+__pycache__/
+*.egg-info/
+
+# Directories with large files
+checkpoints/
+data/
