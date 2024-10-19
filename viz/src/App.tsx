@@ -13,6 +13,7 @@ const CONFIG: { baseUrl: string; hiddenDims: number[], curated?: {name: string, 
   hiddenDims: hiddenDims,
   curated: [
     {name: "free alpha helices", dim: 2293, desc: "Activates on every fourth amino acid in free alpha helices"},
+    {name: "long alpha helices", dim: 1008, desc: "Activates on most amino acids in long alpha helices"},
     {name: "alpha helix turn", dim: 56, desc: "Activates on the turn between two alpha helices in ABC transporter proteins"},
     {name: "single beta sheet", dim: 1299, desc: "Activates on a single beta sheet"},
     {name: "beta sheet: first aa", dim: 782, desc: "Activates on the first amino acid in beta sheets"},
@@ -76,7 +77,7 @@ function App() {
         onClick={toggleSidebar}
         aria-controls="default-sidebar"
         type="button"
-        className="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+        className="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
       >
         <span className="sr-only">Open sidebar</span>
         <svg
@@ -101,7 +102,7 @@ function App() {
         } sm:translate-x-0`}
         aria-label="Sidebar"
       >
-        <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
+        <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50">
           <ul className="space-y-2 font-medium">
             {
               CONFIG.curated?.map((i) => (
@@ -137,7 +138,7 @@ function App() {
         {dimToCuratedMap.has(feature) && (
           <p>{dimToCuratedMap.get(feature)?.desc}</p>
         )}
-        <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
+        <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg">
           <div className="overflow-x-auto">
             {featureData.map((seq) => (
               <SeqViewer seq={seq} key={`seq-${seq.alphafold_id}`} />
