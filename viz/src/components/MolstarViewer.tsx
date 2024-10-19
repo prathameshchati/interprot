@@ -1,27 +1,48 @@
-// Mostly AI generated code
-// generated from this example https://embed.plnkr.co/plunk/JsL8TzofFtKq0ZV4
-
 import { useEffect } from "react";
+import { redColorMap } from "./SeqViewer";
 
-const MolstarViewer = () => {
+interface MolstarViewerProps {
+  alphafold_id: string;
+  activation_list: Array<number>;
+}
+
+// PDBeMolstarPlugin doesn't allow color in rgb format
+function rgbToHex(rgb: string): string {
+  const [r, g, b] = rgb.match(/\d+/g)!.map(Number);
+  const hex = ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
+  return `#${hex}`;
+}
+
+// Generates the "color" data given the activation list
+function residueColor(activation_list: Array<number>) {
+  const max_activation = Math.max(...activation_list);
+  console.warn("max_activation", max_activation);
+
+  return activation_list.map((activation, i) => ({
+    struct_asym_id: "A",
+    residue_number: i + 1,
+    color: rgbToHex(redColorMap(activation, max_activation)),
+  }));
+}
+
+const MolstarViewer = ({
+  alphafold_id,
+  activation_list,
+}: MolstarViewerProps) => {
   useEffect(() => {
-    // Dynamically load the Molstar script
-    const script = document.createElement("script");
-    script.src =
-      "https://cdn.jsdelivr.net/npm/pdbe-molstar@3.3.0/build/pdbe-molstar-plugin.js";
-    script.onload = () => {
+    const loadMolstarPlugin = () => {
       // Create plugin instance and set options after script loads
       // @ts-expect-error
       const viewerInstance = new PDBeMolstarPlugin();
 
       const options = {
         customData: {
-          url: "https://alphafold.ebi.ac.uk/files/AF-O15552-F1-model_v1.cif",
+          url: `https://alphafold.ebi.ac.uk/files/AF-${alphafold_id}-F1-model_v4.cif`,
           format: "cif",
         },
         alphafoldView: true,
         bgColor: { r: 255, g: 255, b: 255 },
-        hideControls: true, // Hide all controls
+        hideControls: true,
         hideCanvasControls: [
           "selection",
           "animation",
@@ -32,47 +53,46 @@ const MolstarViewer = () => {
         landscape: true,
       };
 
-      const viewerContainer = document.getElementById("myViewer");
+      const viewerContainer = document.getElementById(`viewer-${alphafold_id}`);
       viewerInstance.render(viewerContainer, options);
 
-      // Color resides in the viewer
-      // https://github.com/molstar/pdbe-molstar/issues/90#issuecomment-2317239229
-      // Needs to be wrapped in a setTimeout to ensure the viewer is ready
+      // Since we can't color the residues immediately, we'll wait for 3 seconds
+      // TODO: figure out how to listen to when the structure is loaded
       setTimeout(() => {
         viewerInstance.visual.select({
-          data: [
-            { struct_asym_id: "A", residue_number: 1, color: "#ff0000" },
-            { struct_asym_id: "A", residue_number: 2, color: "#ff8800" },
-            {
-              struct_asym_id: "A",
-              start_residue_number: 3,
-              end_residue_number: 6,
-              color: "#ffff00",
-            },
-            {
-              struct_asym_id: "A",
-              start_residue_number: 15,
-              end_residue_number: 20,
-              color: "#88ff00",
-            },
-          ],
+          data: residueColor(activation_list),
           nonSelectedColor: "#ffffff",
         });
-      }, 500);
+      }, 3000);
     };
-    document.body.appendChild(script);
+
+    // Check if the script is already loaded
+    const scriptId = "molstar-script";
+    let script = document.getElementById(scriptId);
+
+    if (!script) {
+      // Dynamically load the Molstar script if not already loaded
+      script = document.createElement("script");
+      script.id = scriptId;
+      script.src =
+        "https://cdn.jsdelivr.net/npm/pdbe-molstar@3.3.0/build/pdbe-molstar-plugin.js";
+      script.onload = loadMolstarPlugin;
+      document.body.appendChild(script);
+    } else {
+      // Script is already loaded, directly initialize the viewer
+      loadMolstarPlugin();
+    }
 
     // Cleanup script on unmount
     return () => {
-      document.body.removeChild(script);
+      // You may not want to remove the script, but if necessary, you can do so
+      // document.body.removeChild(script);
     };
-  }, []);
+  }, [alphafold_id, activation_list]);
 
   return (
-    <div>
-      <h3>PDBe Mol* JS Plugin</h3>
-      <div
-        id="myViewer"
+    <div
+        id={`viewer-${alphafold_id}`}
         style={{
           float: "left",
           width: "700px",
@@ -81,7 +101,6 @@ const MolstarViewer = () => {
           margin: "20px",
         }}
       ></div>
-    </div>
   );
 };
 
