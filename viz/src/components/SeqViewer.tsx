@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import MolstarViewer from "./MolstarViewer";
 
 export interface SeqFormat {
   dimension: number;
@@ -87,7 +86,7 @@ const SeqViewer: React.FC<SeqViewerProps> = ({ seq }) => {
               letterSpacing: -1,
             }}
           >
-            {token_dict[seq.tokens_list[index]]}
+            {token_dict[token]}
           </span>
         );
       })}
