@@ -27,7 +27,7 @@ const dimToCuratedMap = new Map(CONFIG.curated?.map((i) => [i.dim, i]));
 function App() {
   const [feature, setFeature] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return parseInt(params.get("feature") || "0", 10);
+    return parseInt(params.get("feature") || "0", 2293);
   });
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
