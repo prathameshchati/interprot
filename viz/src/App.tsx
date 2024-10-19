@@ -39,9 +39,7 @@ function App() {
         <div className="container mx-auto p-4">
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {data[feature].examples.map((seq) => (
-              <div
-                className="bg-white rounded-lg flex items-center justify-center"
-              >
+              <div className="bg-white rounded-lg flex items-center justify-center">
                 <MolstarViewer
                   key={`molstar-${seq.alphafold_id}`}
                   alphafold_id={seq.alphafold_id}
@@ -52,9 +50,11 @@ function App() {
           </div>
         </div>
         <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
-          {data[feature].examples.map((seq) => (
-            <SeqViewer key={`seq-${seq.alphafold_id}`} seq={seq} />
-          ))}
+          <div className="overflow-x-auto">
+            {data[feature].examples.map((seq) => (
+              <SeqViewer seq={seq} key={`seq-${seq.alphafold_id}`} />
+            ))}
+          </div>
         </div>
       </div>
     </div>
