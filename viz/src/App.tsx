@@ -59,24 +59,6 @@ function App() {
       </div>
     </div>
   );
-
-  return (
-    <>
-      <div className="flex">
-        <div className="w-1/4 bg-gray-200">
-          {data.map((seqInfo, i) => (
-            <p onClick={() => setFeature(i)}>{seqInfo.feature_name}</p>
-          ))}
-        </div>
-        <div className="w-3/4">
-          <h1 className="text-3xl font-bold underline">{feature}</h1>
-          {data[feature].examples.map((seq) => (
-            <SeqViewer seq={seq} />
-          ))}
-        </div>
-      </div>
-    </>
-  );
 }
 
 export default App;
