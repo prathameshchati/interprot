@@ -1,23 +1,23 @@
-import { useEffect, useState } from 'react';
-import MolstarViewer from './components/MolstarViewer';
-import SeqViewer, { SingleSeq } from './components/SeqViewer';
-import { SAE_CONFIGS } from './SAEConfigs';
+import { useEffect, useState } from "react";
+import MolstarViewer from "./components/MolstarViewer";
+import SeqViewer, { SingleSeq } from "./components/SeqViewer";
+import { SAE_CONFIGS } from "./SAEConfigs";
 
-import './App.css';
+import "./App.css";
 
 const NUM_SEQS_TO_DISPLAY = 9;
 
 function App() {
   const [selectedModel, setSelectedModel] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('model') || '4096-dim SAE on ESM2-650M Layer 24';
+    return params.get("model") || "4096-dim SAE on ESM2-650M Layer 24";
   });
   const config = SAE_CONFIGS[selectedModel];
   const dimToCuratedMap = new Map(config.curated?.map((i) => [i.dim, i]));
 
   const [feature, setFeature] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return parseInt(params.get('feature') || config.defaultDim.toString(), 10);
+    return parseInt(params.get("feature") || config.defaultDim.toString(), 10);
   });
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
@@ -28,25 +28,25 @@ function App() {
   useEffect(() => {
     const updateUrl = () => {
       const newUrl = new URL(window.location.href);
-      newUrl.searchParams.set('model', selectedModel);
-      newUrl.searchParams.set('feature', feature.toString());
-      window.history.pushState({}, '', newUrl);
+      newUrl.searchParams.set("model", selectedModel);
+      newUrl.searchParams.set("feature", feature.toString());
+      window.history.pushState({}, "", newUrl);
     };
 
     updateUrl();
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowDown') {
+      if (event.key === "ArrowDown") {
         setFeature((prev) => Math.min(prev + 1, config.numHiddenDims - 1));
-      } else if (event.key === 'ArrowUp') {
+      } else if (event.key === "ArrowUp") {
         setFeature((prev) => Math.max(prev - 1, 0));
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [config, feature, selectedModel]);
 
@@ -88,7 +88,7 @@ function App() {
       <aside
         id="default-sidebar"
         className={`fixed top-0 left-0 z-40 w-100 h-screen transition-transform transform ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } sm:translate-x-0`}
         aria-label="Sidebar"
       >
@@ -116,7 +116,7 @@ function App() {
                 <a
                   onClick={() => setFeature(i.dim)}
                   className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 cursor-pointer group ${
-                    feature === i.dim ? 'font-bold' : ''
+                    feature === i.dim ? "font-bold" : ""
                   }`}
                 >
                   <span className="ms-3">{i.name}</span>
@@ -128,7 +128,7 @@ function App() {
                 <a
                   onClick={() => setFeature(i)}
                   className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 cursor-pointer group ${
-                    feature === i ? 'font-bold' : ''
+                    feature === i ? "font-bold" : ""
                   }`}
                 >
                   <span className="ms-3">{i}</span>

@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { redColorMap } from './SeqViewer';
+import { useEffect } from "react";
+import { redColorMap } from "./SeqViewer";
 
 interface MolstarViewerProps {
   alphafold_id: string;
@@ -9,7 +9,7 @@ interface MolstarViewerProps {
 // PDBeMolstarPlugin doesn't allow color in rgb format
 function rgbToHex(rgb: string): string {
   const [r, g, b] = rgb.match(/\d+/g)!.map(Number);
-  const hex = ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+  const hex = ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
   return `#${hex}`;
 }
 
@@ -17,7 +17,7 @@ function rgbToHex(rgb: string): string {
 function residueColor(activation_list: Array<number>) {
   const max_activation = Math.max(...activation_list);
   return activation_list.map((activation, i) => ({
-    struct_asym_id: 'A',
+    struct_asym_id: "A",
     residue_number: i + 1,
     color: rgbToHex(redColorMap(activation, max_activation)),
   }));
@@ -33,12 +33,12 @@ const MolstarViewer = ({ alphafold_id, activation_list }: MolstarViewerProps) =>
       const options = {
         customData: {
           url: `https://alphafold.ebi.ac.uk/files/AF-${alphafold_id}-F1-model_v4.cif`,
-          format: 'cif',
+          format: "cif",
         },
         alphafoldView: true,
         bgColor: { r: 255, g: 255, b: 255 },
         hideControls: true,
-        hideCanvasControls: ['selection', 'animation', 'controlToggle', 'controlInfo'],
+        hideCanvasControls: ["selection", "animation", "controlToggle", "controlInfo"],
         sequencePanel: true,
         landscape: true,
       };
@@ -50,21 +50,21 @@ const MolstarViewer = ({ alphafold_id, activation_list }: MolstarViewerProps) =>
       viewerInstance.events.loadComplete.subscribe(() => {
         viewerInstance.visual.select({
           data: residueColor(activation_list),
-          nonSelectedColor: '#ffffff',
+          nonSelectedColor: "#ffffff",
         });
       });
     };
 
     // Check if the script is already loaded
-    const scriptId = 'molstar-script';
+    const scriptId = "molstar-script";
     let script = document.getElementById(scriptId);
 
     if (!script) {
       // Dynamically load the Molstar script if not already loaded
-      script = document.createElement('script');
+      script = document.createElement("script");
       script.id = scriptId;
       // @ts-expect-error
-      script.src = 'https://cdn.jsdelivr.net/npm/pdbe-molstar@3.3.0/build/pdbe-molstar-plugin.js';
+      script.src = "https://cdn.jsdelivr.net/npm/pdbe-molstar@3.3.0/build/pdbe-molstar-plugin.js";
       script.onload = loadMolstarPlugin;
       document.body.appendChild(script);
     } else {
@@ -83,9 +83,9 @@ const MolstarViewer = ({ alphafold_id, activation_list }: MolstarViewerProps) =>
     <div
       id={`viewer-${alphafold_id}`}
       style={{
-        width: '400px', // Width and height are required
-        height: '400px',
-        position: 'relative',
+        width: "400px", // Width and height are required
+        height: "400px",
+        position: "relative",
       }}
     ></div>
   );
