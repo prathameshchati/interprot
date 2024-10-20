@@ -3,6 +3,7 @@ export const SAE_CONFIGS: {
     baseUrl: string;
     numHiddenDims: number;
     curated?: { name: string; dim: number; desc: string }[];
+    defaultDim: number;
   };
 } = {
   '4096-dim SAE on ESM2-650M Layer 24': {
@@ -108,40 +109,48 @@ export const SAE_CONFIGS: {
       },
       { name: 'tyrosine', dim: 3481, desc: 'Activates on tyrosine residues' },
     ],
+    defaultDim: 2293,
   },
   '16384-dim SAE on ESM2-650M Layer 5': {
     baseUrl:
       'https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l5_sae16384_1Mseqs/',
     numHiddenDims: 16384,
+    defaultDim: 0,
   },
   '16384-dim SAE on ESM2-650M Layer 10': {
     baseUrl:
       'https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l10_sae16384_1Mseqs/',
     numHiddenDims: 16384,
+    defaultDim: 0,
   },
   '16384-dim SAE on ESM2-650M Layer 15': {
     baseUrl:
       'https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l15_sae16384_1Mseqs/',
     numHiddenDims: 16384,
+    defaultDim: 0,
   },
   '16384-dim SAE on ESM2-650M Layer 20': {
     baseUrl:
       'https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l20_sae16384_1Mseqs/',
     numHiddenDims: 16384,
+    defaultDim: 0,
   },
   '16384-dim SAE on ESM2-650M Layer 25': {
     baseUrl:
       'https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l25_sae16384_1Mseqs/',
     numHiddenDims: 16384,
+    defaultDim: 0,
   },
   '16384-dim SAE on ESM2-650M Layer 30': {
     baseUrl:
       'https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l20_sae16384_1Mseqs/',
     numHiddenDims: 16384,
+    defaultDim: 0,
   },
   '16384-dim SAE on ESM2-650M Layer 33': {
     baseUrl:
       'https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l20_sae16384_1Mseqs/',
     numHiddenDims: 16384,
+    defaultDim: 0,
   },
 };
