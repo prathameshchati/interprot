@@ -6,9 +6,10 @@ import { SAE_CONFIGS } from "./SAEConfigs";
 import "./App.css";
 
 function App() {
-  const [selectedModel, setSelectedModel] = useState(
-    "4096-dim SAE on ESM2-650M Layer 24"
-  );
+  const [selectedModel, setSelectedModel] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("model") || "4096-dim SAE on ESM2-650M Layer 24";
+  });
   const config = SAE_CONFIGS[selectedModel];
   const dimToCuratedMap = new Map(config.curated?.map((i) => [i.dim, i]));
 
@@ -25,6 +26,7 @@ function App() {
   useEffect(() => {
     const updateUrl = () => {
       const newUrl = new URL(window.location.href);
+      newUrl.searchParams.set("model", selectedModel);
       newUrl.searchParams.set("feature", feature.toString());
       window.history.pushState({}, "", newUrl);
     };
@@ -44,7 +46,7 @@ function App() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [config, feature]);
+  }, [config, feature, selectedModel]);
 
   const [featureData, setFeatureData] = useState<SingleSeq[]>([]);
 
