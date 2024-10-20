@@ -23,10 +23,7 @@ function residueColor(activation_list: Array<number>) {
   }));
 }
 
-const MolstarViewer = ({
-  alphafold_id,
-  activation_list,
-}: MolstarViewerProps) => {
+const MolstarViewer = ({ alphafold_id, activation_list }: MolstarViewerProps) => {
   useEffect(() => {
     const loadMolstarPlugin = () => {
       // Create plugin instance and set options after script loads
@@ -41,12 +38,7 @@ const MolstarViewer = ({
         alphafoldView: true,
         bgColor: { r: 255, g: 255, b: 255 },
         hideControls: true,
-        hideCanvasControls: [
-          "selection",
-          "animation",
-          "controlToggle",
-          "controlInfo",
-        ],
+        hideCanvasControls: ["selection", "animation", "controlToggle", "controlInfo"],
         sequencePanel: true,
         landscape: true,
       };
@@ -72,8 +64,7 @@ const MolstarViewer = ({
       script = document.createElement("script");
       script.id = scriptId;
       // @ts-expect-error
-      script.src =
-        "https://cdn.jsdelivr.net/npm/pdbe-molstar@3.3.0/build/pdbe-molstar-plugin.js";
+      script.src = "https://cdn.jsdelivr.net/npm/pdbe-molstar@3.3.0/build/pdbe-molstar-plugin.js";
       script.onload = loadMolstarPlugin;
       document.body.appendChild(script);
     } else {

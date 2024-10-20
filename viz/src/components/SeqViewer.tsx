@@ -96,8 +96,7 @@ const SeqViewer: React.FC<SeqViewerProps> = ({ seq }) => {
           ...
           {/* Tooltip */}
           <span className="invisible absolute left-full ml-2 top-1/2 -translate-y-1/2 w-max bg-gray-900 text-white text-xs rounded-md px-2 py-1 opacity-0 group-hover:opacity-100 group-hover:visible transition-opacity">
-            The number of amino acids hidden in this sequence. (AlphaFoldDB ID:{" "}
-            {seq.alphafold_id})
+            The number of amino acids hidden in this sequence. (AlphaFoldDB ID: {seq.alphafold_id})
           </span>
         </span>
       )}
