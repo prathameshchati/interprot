@@ -2,6 +2,7 @@ import heapq
 import json
 import os
 import re
+from functools import lru_cache
 from typing import Any
 
 import click
@@ -12,6 +13,8 @@ from sae_model import SparseAutoencoder
 from tqdm import tqdm
 from transformers import AutoTokenizer, EsmModel
 from utils import get_layer_activations
+
+NUM_SEQS_PER_DIM = 12
 
 
 class TopKHeap:
@@ -27,6 +30,24 @@ class TopKHeap:
 
     def get_items(self) -> list[tuple[float, int, Any]]:
         return sorted(self.heap, reverse=True)
+
+
+@lru_cache(maxsize=100000)
+def get_sae_acts(
+    seq: str,
+    tokenizer: AutoTokenizer,
+    plm_model: EsmModel,
+    sae_model: SparseAutoencoder,
+    plm_layer: int,
+) -> np.ndarray[np.float32, np.float32]:
+    """
+    Returns a (len(seq), sae_dim) array of SAE activations.
+    """
+    esm_layer_acts = get_layer_activations(
+        tokenizer=tokenizer, plm=plm_model, seqs=[seq], layer=plm_layer
+    )[0]
+    sae_acts = sae_model.get_acts(esm_layer_acts)[1:-1]  # Trim BOS and EOS tokens
+    return sae_acts.cpu().numpy()
 
 
 @click.command()
@@ -60,22 +81,14 @@ def make_viz_files(checkpoint_file: str, sequences_file: str):
     sae_model = SparseAutoencoder(plm_dim, sae_dim).to(device)
     sae_model.load_state_dict(torch.load(checkpoint_file, map_location=device))
 
-    hidden_dim_to_seqs = {dim: TopKHeap(k=10) for dim in range(sae_dim)}
-    # Read the sequences file
+    hidden_dim_to_seqs = {dim: TopKHeap(k=NUM_SEQS_PER_DIM) for dim in range(sae_dim)}
+
     df = pl.read_parquet(sequences_file)
     for seq_idx, row in tqdm(
         enumerate(df.iter_rows(named=True)), total=len(df), desc="Processing sequences"
     ):
         seq = row["Sequence"]
-
-        esm_layer_acts = get_layer_activations(
-            tokenizer=tokenizer,
-            plm=plm_model,
-            seqs=[seq],
-            layer=plm_layer,
-            device=device,
-        )[0]
-        sae_acts = sae_model.get_acts(esm_layer_acts)[1:-1].cpu().numpy()
+        sae_acts = get_sae_acts(seq, tokenizer, plm_model, sae_model, plm_layer)
         for dim in range(sae_dim):
             sae_dim_acts = sae_acts[:, dim]
             max_act = np.max(sae_dim_acts)
