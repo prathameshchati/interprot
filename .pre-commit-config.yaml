@@ -5,7 +5,7 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-added-large-files
-        args: ['--maxkb=1000']
+        args: ["--maxkb=1000"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.6
@@ -26,3 +26,6 @@ repos:
         types_or: [javascript, jsx, ts, tsx, json, yaml, css, scss, markdown]
         additional_dependencies:
           - prettier@2.8.8
+        files: ^viz/
+        entry: bash -c 'cd viz && prettier --write --ignore-unknown "${@/#viz\//}"' --
+        args: [--config, viz/.prettierrc]
