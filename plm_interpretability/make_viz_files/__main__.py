@@ -79,7 +79,11 @@ def make_viz_files(checkpoint_file: str, sequences_file: str):
     tokenizer = AutoTokenizer.from_pretrained("facebook/esm2_t33_650M_UR50D")
     plm_model = EsmModel.from_pretrained("facebook/esm2_t33_650M_UR50D").to(device).eval()
     sae_model = SparseAutoencoder(plm_dim, sae_dim).to(device)
-    sae_model.load_state_dict(torch.load(checkpoint_file, map_location=device))
+
+    try:
+        sae_model.load_state_dict(torch.load(checkpoint_file, map_location=device))
+    except Exception:
+        sae_model.load_state_dict(torch.load(checkpoint_file, map_location=device)["state_dict"])
 
     hidden_dim_to_seqs = {dim: TopKHeap(k=NUM_SEQS_PER_DIM) for dim in range(sae_dim)}
 
