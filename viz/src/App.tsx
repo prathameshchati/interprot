@@ -5,6 +5,8 @@ import { SAE_CONFIGS } from './SAEConfigs';
 
 import './App.css';
 
+const NUM_SEQS_TO_DISPLAY = 9;
+
 function App() {
   const [selectedModel, setSelectedModel] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -55,7 +57,7 @@ function App() {
     fetch(fileURL)
       .then((response) => response.json())
       .then((data) => {
-        setFeatureData(data);
+        setFeatureData(data.slice(0, NUM_SEQS_TO_DISPLAY));
       });
   }, [config, feature]);
 
