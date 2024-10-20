@@ -83,7 +83,12 @@ def make_viz_files(checkpoint_file: str, sequences_file: str):
     try:
         sae_model.load_state_dict(torch.load(checkpoint_file, map_location=device))
     except Exception:
-        sae_model.load_state_dict(torch.load(checkpoint_file, map_location=device)["state_dict"])
+        sae_model.load_state_dict(
+            {
+                k.replace("sae_model.", ""): v
+                for k, v in torch.load(checkpoint_file, map_location=device)["state_dict"].items()
+            }
+        )
 
     hidden_dim_to_seqs = {dim: TopKHeap(k=NUM_SEQS_PER_DIM) for dim in range(sae_dim)}
 
