@@ -1,59 +1,23 @@
 import { useEffect, useState } from "react";
 import MolstarViewer from "./components/MolstarViewer";
 import SeqViewer, { SingleSeq } from "./components/SeqViewer";
+import { SAE_CONFIGS } from "./SAEConfigs";
 
 import "./App.css";
 
-// TODO: Filter this down to a curated, interesting set of dims
-const hiddenDims = Array.from({ length: 4096 }, (_, index) => index);
-
-const CONFIG: { baseUrl: string; hiddenDims: number[], curated?: {name: string, dim: number, desc: string}[] } = {
-  baseUrl:
-    "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l24_sae4096_100Kseqs/",
-  hiddenDims: hiddenDims,
-  curated: [
-    {name: "free alpha helices", dim: 2293, desc: "Activates on every fourth amino acid in free alpha helices"},
-    {name: "long alpha helices", dim: 1008, desc: "Activates on most amino acids in long alpha helices"},
-    {name: "alpha helix turn", dim: 56, desc: "Activates on the turn between two alpha helices in ABC transporter proteins"},
-    {name: "single beta sheet", dim: 1299, desc: "Activates on a single beta sheet"},
-    {name: "beta sheet: first aa", dim: 782, desc: "Activates on the first amino acid in beta sheets"},
-    {name: "beta helix", dim: 250, desc: "Activates on short beta strands in beta helices"},
-    {name: "disordered", dim: 2763, desc: "Activates on disordered regions containing K, A, and P residues"},
-    {name: "leucine rich repeats", dim: 3425, desc: "Activates on the amino acid before the start of a beta sheet in a leucine rich repeat"},
-    {name: "start M", dim: 600, desc: "Activates on the M amino acid at the start of a sequence"},
-    {name: "second residue", dim: 3728, desc: "Mostly activates on the second amino acid in a sequence"},
-    {name: "alanine", dim: 3267, desc: "Activates on alanine residues"},
-    {name: "aspartic acid", dim: 2830, desc: "Activates on aspartic acid residues"},
-    {name: "glutamic acid", dim: 2152, desc: "Activates on glutamic acid residues"},
-    {name: "phenylalanine", dim: 252, desc: "Activates on phenylalanine residues"},
-    {name: "aspartic acid", dim: 3830, desc: "Activates on aspartic acid residues"},
-    {name: "histidine", dim: 743, desc: "Activates on histidine residues"},
-    {name: "isoleucine", dim: 3978, desc: "Activates on isoleucine residues"},
-    {name: "lysine", dim: 3073, desc: "Activates on lysine residues"},
-    {name: "leucine", dim: 1497, desc: "Activates on leucine residues"},
-    {name: "methionine", dim: 444, desc: "Activates on methionine residues"},
-    {name: "asparagine", dim: 21, desc: "Activates on asparagine residues"},
-    {name: "proline", dim: 1386, desc: "Activates on proline residues"},
-    {name: "glutamine", dim: 1266, desc: "Activates on glutamine residues"},
-    {name: "arginine", dim: 3569, desc: "Activates on arginine residues"},
-    {name: "serine", dim: 1473, desc: "Activates on serine residues"},
-    {name: "threonine", dim: 220, desc: "Activates on threonine residues"},
-    {name: "valine", dim: 3383, desc: "Activates on valine residues"},
-    {name: "tryptophan", dim: 2685, desc: "Activates on tryptophan residues"},
-    {name: "tyrosine", dim: 3481, desc: "Activates on tyrosine residues"},
-  ]
-};
-
-const dimToCuratedMap = new Map(CONFIG.curated?.map((i) => [i.dim, i]));
-
 function App() {
+  const [selectedModel, setSelectedModel] = useState(
+    "4096-dim SAE on ESM2-650M Layer 24"
+  );
+  const config = SAE_CONFIGS[selectedModel];
+  const dimToCuratedMap = new Map(config.curated?.map((i) => [i.dim, i]));
+
   const [feature, setFeature] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return parseInt(params.get("feature") || "2293", 10);
   });
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
-  // Step 2: Function to toggle the sidebar's visibility
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
   };
@@ -69,7 +33,7 @@ function App() {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "ArrowDown") {
-        setFeature((prev) => Math.min(prev + 1, CONFIG.hiddenDims.length - 1));
+        setFeature((prev) => Math.min(prev + 1, config.numHiddenDims - 1));
       } else if (event.key === "ArrowUp") {
         setFeature((prev) => Math.max(prev - 1, 0));
       }
@@ -80,18 +44,19 @@ function App() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [feature]);
+  }, [config, feature]);
 
   const [featureData, setFeatureData] = useState<SingleSeq[]>([]);
 
   useEffect(() => {
-    const fileURL = `${CONFIG.baseUrl}${feature}.json`;
+    const fileURL = `${config.baseUrl}${feature}.json`;
     fetch(fileURL)
       .then((response) => response.json())
       .then((data) => {
         setFeatureData(data);
       });
-  }, [feature]);
+  }, [config, feature]);
+
   return (
     <div>
       <button
@@ -118,39 +83,59 @@ function App() {
 
       <aside
         id="default-sidebar"
-        className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform transform ${
+        className={`fixed top-0 left-0 z-40 w-100 h-screen transition-transform transform ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } sm:translate-x-0`}
         aria-label="Sidebar"
       >
         <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50">
+          <div className="mb-4">
+            <label
+              htmlFor="model-select"
+              className="block mb-2 text-sm font-medium text-gray-900"
+            >
+              Select SAE Model
+            </label>
+            <select
+              id="model-select"
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            >
+              {Object.keys(SAE_CONFIGS).map((model) => (
+                <option key={model} value={model}>
+                  {model}
+                </option>
+              ))}
+            </select>
+          </div>
           <ul className="space-y-2 font-medium">
-            {
-              CONFIG.curated?.map((i) => (
-                <li key={`feature-${i.dim}`}>
-                  <a
-                    onClick={() => setFeature(i.dim)}
-                    className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 cursor-pointer group ${
-                      feature === i.dim ? "font-bold" : ""
-                    }`}
-                  >
-                    <span className="ms-3">{i.name}</span>
-                  </a>
-                </li>
-              ))
-            }
-            {CONFIG.hiddenDims.map((i) => (
-              <li key={`feature-${i}`}>
+            {config.curated?.map((i) => (
+              <li key={`feature-${i.dim}`}>
                 <a
-                  onClick={() => setFeature(i)}
+                  onClick={() => setFeature(i.dim)}
                   className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 cursor-pointer group ${
-                    feature === i ? "font-bold" : ""
+                    feature === i.dim ? "font-bold" : ""
                   }`}
                 >
-                  <span className="ms-3">{i}</span>
+                  <span className="ms-3">{i.name}</span>
                 </a>
               </li>
             ))}
+            {Array.from({ length: config.numHiddenDims }, (_, i) => i).map(
+              (i) => (
+                <li key={`feature-${i}`}>
+                  <a
+                    onClick={() => setFeature(i)}
+                    className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 cursor-pointer group ${
+                      feature === i ? "font-bold" : ""
+                    }`}
+                  >
+                    <span className="ms-3">{i}</span>
+                  </a>
+                </li>
+              )
+            )}
           </ul>
         </div>
       </aside>
