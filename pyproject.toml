@@ -30,7 +30,7 @@ packages = [
 [project.scripts]
 autointerp = "plm_interpretability.autointerp.__main__:cli"
 logistic_regression_probe = "plm_interpretability.logistic_regression_probe.__main__:cli"
-make_viz_files = "plm_interpretability.make_viz_files.__main__:cli"
+make_viz_files = "plm_interpretability.make_viz_files.__main__:make_viz_files"
 
 [project.urls]
 Homepage = "https://github.com/etowahadams/plm-interpretability"

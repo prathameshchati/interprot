@@ -9,10 +9,11 @@ import click
 import numpy as np
 import polars as pl
 import torch
-from sae_model import SparseAutoencoder
 from tqdm import tqdm
 from transformers import AutoTokenizer, EsmModel
-from utils import get_layer_activations
+
+from plm_interpretability.sae_model import SparseAutoencoder
+from plm_interpretability.utils import get_layer_activations
 
 OUTPUT_ROOT_DIR = "viz_files"
 NUM_SEQS_PER_DIM = 12
