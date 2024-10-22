@@ -34,21 +34,10 @@ class TopKHeap:
 
 
 @lru_cache(maxsize=100000)
-def get_sae_acts(
-    seq: str,
-    tokenizer: AutoTokenizer,
-    plm_model: EsmModel,
-    sae_model: SparseAutoencoder,
-    plm_layer: int,
-) -> np.ndarray[np.float32, np.float32]:
-    """
-    Returns a (len(seq), sae_dim) array of SAE activations.
-    """
-    esm_layer_acts = get_layer_activations(
-        tokenizer=tokenizer, plm=plm_model, seqs=[seq], layer=plm_layer
-    )[0]
-    sae_acts = sae_model.get_acts(esm_layer_acts)[1:-1]  # Trim BOS and EOS tokens
-    return sae_acts.cpu().numpy()
+def get_esm_layer_acts(
+    seq: str, tokenizer: AutoTokenizer, plm_model: EsmModel, plm_layer: int
+) -> torch.Tensor:
+    return get_layer_activations(tokenizer=tokenizer, plm=plm_model, seqs=[seq], layer=plm_layer)[0]
 
 
 @click.command()
@@ -107,7 +96,10 @@ def make_viz_files(checkpoint_files: list[str], sequences_file: str):
             enumerate(df.iter_rows(named=True)), total=len(df), desc="Processing sequences"
         ):
             seq = row["Sequence"]
-            sae_acts = get_sae_acts(seq, tokenizer, plm_model, sae_model, plm_layer)
+            esm_layer_acts = get_esm_layer_acts(seq, tokenizer, plm_model, plm_layer)
+            sae_acts = (
+                sae_model.get_acts(esm_layer_acts)[1:-1].cpu().numpy()
+            )  # Trim BOS and EOS tokens
             for dim in range(sae_dim):
                 sae_dim_acts = sae_acts[:, dim]
                 # Use the max activation across the sequence for ranking
