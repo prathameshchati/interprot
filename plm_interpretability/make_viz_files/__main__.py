@@ -126,11 +126,11 @@ def make_viz_files(checkpoint_files: list[str], sequences_file: str):
             ]
             dim_to_examples[dim] = examples
 
-        OUTPUT_ROOT_DIR_name = os.path.basename(checkpoint_file).split(".")[0]
-        os.makedirs(os.path.join(OUTPUT_ROOT_DIR, OUTPUT_ROOT_DIR_name), exist_ok=True)
+        output_dir_name = os.path.basename(checkpoint_file).split(".")[0]
+        os.makedirs(os.path.join(OUTPUT_ROOT_DIR, output_dir_name), exist_ok=True)
 
         for dim in range(sae_dim):
-            with open(os.path.join(OUTPUT_ROOT_DIR, OUTPUT_ROOT_DIR_name, f"{dim}.json"), "w") as f:
+            with open(os.path.join(OUTPUT_ROOT_DIR, output_dir_name, f"{dim}.json"), "w") as f:
                 json.dump(dim_to_examples[dim], f)
 
 
