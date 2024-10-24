@@ -134,7 +134,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
         <div className="flex overflow-x-auto">
           <Input
             type="text"
-            style={{ marginLeft: 10, marginRight: 10 }}
+            style={{ marginRight: 10 }}
             value={sequence}
             onChange={(e) => setSequence(e.target.value)}
             placeholder="Enter your own protein sequence"
