@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
-import { redColorMap } from "../utils";
+import { redColorMap, tokenToResidue } from "../utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { tokensToSequence } from "../utils";
 
 export interface SeqFormat {
   dimension: number;
@@ -15,38 +16,8 @@ export interface SingleSeq {
 }
 
 interface SeqViewerProps {
-  seq: SingleSeq;
+  seq: Omit<SingleSeq, "alphafold_id"> & { alphafold_id?: string };
 }
-
-const token_dict: { [key: number]: string } = {
-  4: "L",
-  5: "A",
-  6: "G",
-  7: "V",
-  8: "S",
-  9: "E",
-  10: "R",
-  11: "T",
-  12: "I",
-  13: "D",
-  14: "P",
-  15: "K",
-  16: "Q",
-  17: "N",
-  18: "F",
-  19: "Y",
-  20: "M",
-  21: "H",
-  22: "W",
-  23: "C",
-  24: "X",
-  25: "B",
-  26: "U",
-  27: "Z",
-  28: "O",
-  29: ".",
-  30: "-",
-};
 
 function getFirstNonZeroIndex(arr: Array<number>) {
   for (let i = 0; i < arr.length; i++) {
@@ -72,7 +43,7 @@ const SeqViewer: React.FC<SeqViewerProps> = ({ seq }) => {
   const activationsToShow = seq.tokens_acts_list.slice(startIdx);
 
   const copySequenceToClipboard = () => {
-    navigator.clipboard.writeText(seq.tokens_list.map((token) => token_dict[token]).join(""));
+    navigator.clipboard.writeText(tokensToSequence(seq.tokens_list));
   };
 
   return (
@@ -85,15 +56,15 @@ const SeqViewer: React.FC<SeqViewerProps> = ({ seq }) => {
               ...
             </TooltipTrigger>
             <TooltipContent>
-              The number of amino acids hidden in this sequence. (AlphaFoldDB ID: {seq.alphafold_id}
-              )
+              The number of amino acids hidden in this sequence
+              {seq.alphafold_id && <span> (AlphaFoldDB ID: {seq.alphafold_id})</span>}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       )}
       {tokensToShow.map((token, index) => {
         const color = redColorMap(activationsToShow[index], maxValue);
-        const tokenChar = token_dict[token];
+        const tokenChar = tokenToResidue(token);
         return (
           <TooltipProvider key={`token-${index}`} delayDuration={100}>
             <Tooltip>

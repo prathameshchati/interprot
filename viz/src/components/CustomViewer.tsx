@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { residueColor } from "../utils";
+import SeqViewer from "./SeqViewer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import { sequenceToTokens } from "../utils";
 interface CustomViewerProps {
   feature: number;
 }
@@ -26,7 +27,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
         },
         body: JSON.stringify({
           input: {
-            sequence: sequence,
+            sequence: sequence.toUpperCase(),
             dim: feature,
           },
         }),
@@ -66,7 +67,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
           headers: {
             "Content-Type": "text/plain",
           },
-          body: sequenceRef.current,
+          body: sequenceRef.current.toUpperCase(),
         });
 
         if (!response.ok) {
@@ -101,7 +102,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
             data: residueColor(activationList),
             nonSelectedColor: "#ffffff",
           });
-          setMessage("Structure is generated with ESMFold.");
+          setMessage("Structure generated with ESMFold.");
         });
       } catch (error) {
         console.error("Error folding sequence:", error);
@@ -144,6 +145,16 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
           </Button>
         </div>
       </div>
+      {activationList.length > 0 && (
+        <div style={{ margin: 20 }}>
+          <SeqViewer
+            seq={{
+              tokens_acts_list: activationList,
+              tokens_list: sequenceToTokens(sequence.toUpperCase()),
+            }}
+          />
+        </div>
+      )}
       {activationList.length > 0 && (
         <div
           id="custom-viewer"
