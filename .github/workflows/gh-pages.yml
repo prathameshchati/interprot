@@ -41,6 +41,8 @@ jobs:
           cd viz
           pnpm install
       - name: Build
+        env:
+          VITE_RUNPOD_API_KEY: ${{ secrets.VITE_RUNPOD_API_KEY }}
         run: cd viz && pnpm run build
       - name: Setup Pages
         uses: actions/configure-pages@v3

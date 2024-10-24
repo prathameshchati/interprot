@@ -18,7 +18,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer 07NER30B3DQHVDQ3C732MK6I0VT6KFCO2J718H4P",
+          Authorization: `Bearer ${import.meta.env.VITE_RUNPOD_API_KEY}`,
         },
         body: JSON.stringify({
           input: {
@@ -35,7 +35,6 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
       const resp = await response.json();
       const data = resp.output.data;
       if (data.tokens_acts_list) {
-        console.log(data.tokens_acts_list);
         setActivationList(data.tokens_acts_list);
       } else {
         console.error("Unexpected data format:", data);

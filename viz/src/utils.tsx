@@ -26,7 +26,6 @@ export function rgbToHex(rgb: string): string {
 
 // Generates the "color" data given the activation list
 export function residueColor(activation_list: Array<number>) {
-  console.log("coloring...", activation_list);
   const max_activation = Math.max(...activation_list);
   return activation_list.map((activation, i) => ({
     struct_asym_id: "A",
