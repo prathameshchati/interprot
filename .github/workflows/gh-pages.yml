@@ -43,7 +43,7 @@ jobs:
       - name: Build
         env:
           VITE_RUNPOD_API_KEY: ${{ secrets.VITE_RUNPOD_API_KEY }}
-        run: cd viz && pnpm run build
+        run: cd viz && pnpm run build && echo "interprot.com" > ./dist/CNAME
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
