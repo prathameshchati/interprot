@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { redColorMap } from "../utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface SeqFormat {
   dimension: number;
@@ -70,31 +71,48 @@ const SeqViewer: React.FC<SeqViewerProps> = ({ seq }) => {
   const tokensToShow = seq.tokens_list.slice(startIdx);
   const activationsToShow = seq.tokens_acts_list.slice(startIdx);
 
+  const copySequenceToClipboard = () => {
+    navigator.clipboard.writeText(seq.tokens_list.map((token) => token_dict[token]).join(""));
+  };
+
   return (
-    <div className="inline-flex">
+    <div className="inline-flex" style={{ cursor: "pointer" }}>
       {startIdx > 0 && (
-        <span className="relative inline-flex group">
-          <span style={{ color: "gray" }}>+{startIdx}</span>
-          ...
-          {/* Tooltip */}
-          <span className="invisible absolute left-full ml-2 top-1/2 -translate-y-1/2 w-max bg-gray-900 text-white text-xs rounded-md px-2 py-1 opacity-0 group-hover:opacity-100 group-hover:visible transition-opacity">
-            The number of amino acids hidden in this sequence. (AlphaFoldDB ID: {seq.alphafold_id})
-          </span>
-        </span>
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger>
+              <span style={{ color: "gray" }}>+{startIdx}</span>
+              ...
+            </TooltipTrigger>
+            <TooltipContent>
+              The number of amino acids hidden in this sequence. (AlphaFoldDB ID: {seq.alphafold_id}
+              )
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
       {tokensToShow.map((token, index) => {
         const color = redColorMap(activationsToShow[index], maxValue);
+        const tokenChar = token_dict[token];
         return (
-          <span
-            key={`token-${index}`}
-            style={{
-              backgroundColor: color,
-              borderRadius: 2,
-              letterSpacing: -1,
-            }}
-          >
-            {token_dict[token]}
-          </span>
+          <TooltipProvider key={`token-${index}`} delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger>
+                <span
+                  style={{
+                    backgroundColor: color,
+                    borderRadius: 2,
+                    letterSpacing: -1,
+                  }}
+                >
+                  {tokenChar}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent onClick={copySequenceToClipboard} style={{ cursor: "pointer" }}>
+                Copy
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         );
       })}
     </div>

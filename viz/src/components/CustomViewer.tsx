@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { residueColor } from "../utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface CustomViewerProps {
   feature: number;
@@ -9,6 +11,8 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
   const [activationList, setActivationList] = useState<number[]>([]);
   const [sequence, setSequence] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+  const sequenceRef = useRef<string>("");
 
   const fetchSAEActivations = async () => {
     if (!sequence) return;
@@ -47,12 +51,14 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
   };
 
   const handleSubmit = async () => {
+    sequenceRef.current = sequence;
     await fetchSAEActivations();
+    setMessage("");
   };
 
   useEffect(() => {
     const showStructure = async () => {
-      if (!sequence) return;
+      if (!sequenceRef.current) return;
       setIsLoading(true);
       try {
         const response = await fetch("https://api.esmatlas.com/foldSequence/v1/pdb/", {
@@ -60,20 +66,18 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
           headers: {
             "Content-Type": "text/plain",
           },
-          body: sequence,
+          body: sequenceRef.current,
         });
 
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
+        console.log("response", response);
 
         const pdbData = await response.text();
-
-        // Create a Blob with the PDB data
         const blob = new Blob([pdbData], { type: "text/plain" });
         const blobUrl = URL.createObjectURL(blob);
 
-        // Update the viewer with the new PDB data
         // @ts-expect-error
         const viewerInstance = new PDBeMolstarPlugin();
         const options = {
@@ -92,12 +96,12 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
         const viewerContainer = document.getElementById("custom-viewer");
         viewerInstance.render(viewerContainer, options);
 
-        // Listen for the 'load' event
         viewerInstance.events.loadComplete.subscribe(() => {
           viewerInstance.visual.select({
             data: residueColor(activationList),
             nonSelectedColor: "#ffffff",
           });
+          setMessage("Structure is generated with ESMFold.");
         });
       } catch (error) {
         console.error("Error folding sequence:", error);
@@ -106,63 +110,52 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
       }
     };
 
-    if (activationList.length > 0) {
-      showStructure();
+    if (activationList.length === 0) return;
+    if (sequenceRef.current.length > 400) {
+      setMessage(
+        "No structure generated. We are folding with ESMFold API which has a limit of 400 residues."
+      );
+      return;
     }
-  }, [feature, sequence, activationList]);
+    showStructure();
+  }, [feature, activationList]);
 
+  // Reset custom viewer state whenever user navigates to a new feature
   useEffect(() => {
     setActivationList([]);
     setSequence("");
     setIsLoading(false);
+    setMessage("");
   }, [feature]);
 
   return (
     <div>
       <div style={{ marginTop: 20 }}>
         <div className="flex overflow-x-auto">
-          <input
+          <Input
             type="text"
+            style={{ marginLeft: 10, marginRight: 10 }}
             value={sequence}
             onChange={(e) => setSequence(e.target.value)}
-            placeholder="Enter protein sequence"
-            style={{
-              width: "100%",
-              padding: "10px",
-              fontSize: "16px",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              marginRight: "10px",
-              outline: "none",
-            }}
+            placeholder="Enter your own protein sequence"
           />
-          <button
-            onClick={handleSubmit}
-            disabled={isLoading || !sequence}
-            style={{
-              padding: "10px 20px",
-              fontSize: "16px",
-              backgroundColor: isLoading || !sequence ? "#ccc" : "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: isLoading || !sequence ? "not-allowed" : "pointer",
-              transition: "background-color 0.3s",
-            }}
-          >
-            {isLoading ? "Loading..." : "Analyze"}
-          </button>
+          <Button onClick={handleSubmit} disabled={isLoading || !sequence}>
+            {isLoading ? "Loading..." : "Submit"}
+          </Button>
         </div>
       </div>
-      <div
-        id="custom-viewer"
-        style={{
-          marginTop: 20,
-          width: "100%",
-          height: activationList.length > 0 ? 400 : 0,
-          position: "relative",
-        }}
-      />
+      {activationList.length > 0 && (
+        <div
+          id="custom-viewer"
+          style={{
+            marginTop: 20,
+            width: "100%",
+            height: activationList.length > 0 ? 400 : 0,
+            position: "relative",
+          }}
+        />
+      )}
+      {message && <small>{message}</small>}
     </div>
   );
 };
