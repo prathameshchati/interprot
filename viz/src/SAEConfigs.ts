@@ -4,6 +4,7 @@ export const SAE_CONFIGS: {
     numHiddenDims: number;
     curated?: { name: string; dim: number; desc: string }[];
     defaultDim: number;
+    supportsCustomSequence?: boolean;
   };
 } = {
   "4096-dim SAE on ESM2-650M Layer 24": {
@@ -110,6 +111,7 @@ export const SAE_CONFIGS: {
       { name: "tyrosine", dim: 3481, desc: "Activates on tyrosine residues" },
     ],
     defaultDim: 2293,
+    supportsCustomSequence: true,
   },
   "16384-dim SAE on ESM2-650M Layer 5": {
     baseUrl:

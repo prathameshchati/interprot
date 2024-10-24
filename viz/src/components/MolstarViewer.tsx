@@ -1,26 +1,9 @@
 import { useEffect } from "react";
-import { redColorMap } from "./SeqViewer";
+import { residueColor } from "../utils";
 
 interface MolstarViewerProps {
   alphafold_id: string;
   activation_list: Array<number>;
-}
-
-// PDBeMolstarPlugin doesn't allow color in rgb format
-function rgbToHex(rgb: string): string {
-  const [r, g, b] = rgb.match(/\d+/g)!.map(Number);
-  const hex = ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
-  return `#${hex}`;
-}
-
-// Generates the "color" data given the activation list
-function residueColor(activation_list: Array<number>) {
-  const max_activation = Math.max(...activation_list);
-  return activation_list.map((activation, i) => ({
-    struct_asym_id: "A",
-    residue_number: i + 1,
-    color: rgbToHex(redColorMap(activation, max_activation)),
-  }));
 }
 
 const MolstarViewer = ({ alphafold_id, activation_list }: MolstarViewerProps) => {
