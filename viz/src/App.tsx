@@ -10,7 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sidebar, SidebarContent, SidebarProvider, SidebarHeader } from "@/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarProvider,
+  SidebarHeader,
+  SidebarFooter,
+} from "@/components/ui/sidebar";
 
 import "./App.css";
 import { Toggle } from "./components/ui/toggle";
@@ -58,18 +64,6 @@ function App() {
           <h2 className="text-xl font-semibold" style={{ margin: 5 }}>
             SAE Feature
           </h2>
-          <Select value={selectedModel} onValueChange={(value) => setSelectedModel(value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select SAE Model" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.keys(SAE_CONFIGS).map((model) => (
-                <SelectItem key={model} value={model}>
-                  {model}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </SidebarHeader>
         <SidebarContent>
           <ul className="space-y-2 font-medium">
@@ -97,6 +91,20 @@ function App() {
             ))}
           </ul>
         </SidebarContent>
+        <SidebarFooter style={{ padding: 10 }}>
+          <Select value={selectedModel} onValueChange={(value) => setSelectedModel(value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select SAE Model" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.keys(SAE_CONFIGS).map((model) => (
+                <SelectItem key={model} value={model}>
+                  {model}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </SidebarFooter>
       </Sidebar>
       <main className="text-left max-w-full overflow-x-auto">
         <h1 className="text-3xl font-bold">Feature {feature}</h1>

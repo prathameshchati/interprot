@@ -12,6 +12,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
   const [activationList, setActivationList] = useState<number[]>([]);
   const [sequence, setSequence] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showStructure, setShowStructure] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
   const sequenceRef = useRef<string>("");
 
@@ -58,7 +59,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
   };
 
   useEffect(() => {
-    const showStructure = async () => {
+    const renderStructure = async () => {
       if (!sequenceRef.current) return;
       setIsLoading(true);
       try {
@@ -111,14 +112,27 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
       }
     };
 
-    if (activationList.length === 0) return;
-    if (sequenceRef.current.length > 400) {
-      setMessage(
-        "No structure generated. We are folding with ESMFold API which has a limit of 400 residues."
-      );
+    if (activationList.length === 0) {
+      setShowStructure(false);
       return;
     }
-    showStructure();
+    if (activationList.every((act) => act === 0)) {
+      setMessage(
+        "This feature did not activate on your sequence. Try a sequence more similar to ones below."
+      );
+      setShowStructure(false);
+      return;
+    }
+    if (sequenceRef.current.length > 400) {
+      setMessage(
+        "No structure generated. We are folding with ESMFold API which has a limit of 400 residues. Please try a shorter sequence."
+      );
+      setShowStructure(false);
+      return;
+    }
+
+    setShowStructure(true);
+    renderStructure();
   }, [feature, activationList]);
 
   // Reset custom viewer state whenever user navigates to a new feature
@@ -155,7 +169,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
           />
         </div>
       )}
-      {activationList.length > 0 && (
+      {showStructure && (
         <div
           id="custom-viewer"
           style={{
