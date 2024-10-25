@@ -3,8 +3,23 @@ import MolstarViewer from "./components/MolstarViewer";
 import SeqViewer, { SingleSeq } from "./components/SeqViewer";
 import CustomViewer from "./components/CustomViewer";
 import { SAE_CONFIGS } from "./SAEConfigs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarProvider,
+  SidebarHeader,
+  SidebarFooter,
+} from "@/components/ui/sidebar";
 
 import "./App.css";
+import { Toggle } from "./components/ui/toggle";
 
 const NUM_SEQS_TO_DISPLAY = 9;
 
@@ -20,11 +35,6 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     return parseInt(params.get("feature") || config.defaultDim.toString(), 10);
   });
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!isSidebarOpen);
-  };
 
   useEffect(() => {
     const updateUrl = () => {
@@ -33,22 +43,7 @@ function App() {
       newUrl.searchParams.set("feature", feature.toString());
       window.history.pushState({}, "", newUrl);
     };
-
     updateUrl();
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowDown") {
-        setFeature((prev) => Math.min(prev + 1, config.numHiddenDims - 1));
-      } else if (event.key === "ArrowUp") {
-        setFeature((prev) => Math.max(prev - 1, 0));
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
   }, [config, feature, selectedModel]);
 
   const [featureData, setFeatureData] = useState<SingleSeq[]>([]);
@@ -63,84 +58,56 @@ function App() {
   }, [config, feature]);
 
   return (
-    <div>
-      <button
-        onClick={toggleSidebar}
-        aria-controls="default-sidebar"
-        type="button"
-        className="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
-      >
-        <span className="sr-only">Open sidebar</span>
-        <svg
-          className="w-6 h-6"
-          aria-hidden="true"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            clip-rule="evenodd"
-            fill-rule="evenodd"
-            d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-          ></path>
-        </svg>
-      </button>
-
-      <aside
-        id="default-sidebar"
-        className={`fixed top-0 left-0 z-40 w-100 h-screen transition-transform transform ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } sm:translate-x-0`}
-        aria-label="Sidebar"
-      >
-        <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50">
-          <div className="mb-4">
-            <label htmlFor="model-select" className="block mb-2 text-sm font-medium text-gray-900">
-              Select SAE Model
-            </label>
-            <select
-              id="model-select"
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            >
-              {Object.keys(SAE_CONFIGS).map((model) => (
-                <option key={model} value={model}>
-                  {model}
-                </option>
-              ))}
-            </select>
-          </div>
+    <SidebarProvider>
+      <Sidebar>
+        <SidebarHeader>
+          <h2 className="text-xl font-semibold" style={{ margin: 5 }}>
+            SAE Feature
+          </h2>
+        </SidebarHeader>
+        <SidebarContent>
           <ul className="space-y-2 font-medium">
             {config.curated?.map((i) => (
-              <li key={`feature-${i.dim}`}>
-                <a
-                  onClick={() => setFeature(i.dim)}
-                  className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 cursor-pointer group ${
-                    feature === i.dim ? "font-bold" : ""
-                  }`}
-                >
-                  <span className="ms-3">{i.name}</span>
-                </a>
-              </li>
+              <Toggle
+                key={`feature-${i.dim}`}
+                style={{ width: "100%", paddingLeft: 20 }}
+                className="justify-start"
+                pressed={feature === i.dim}
+                onPressedChange={() => setFeature(i.dim)}
+              >
+                {i.name}
+              </Toggle>
             ))}
             {Array.from({ length: config.numHiddenDims }, (_, i) => i).map((i) => (
-              <li key={`feature-${i}`}>
-                <a
-                  onClick={() => setFeature(i)}
-                  className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 cursor-pointer group ${
-                    feature === i ? "font-bold" : ""
-                  }`}
-                >
-                  <span className="ms-3">{i}</span>
-                </a>
-              </li>
+              <Toggle
+                key={`feature-${i}`}
+                style={{ width: "100%", paddingLeft: 20 }}
+                className="justify-start"
+                pressed={feature === i}
+                onPressedChange={() => setFeature(i)}
+              >
+                {i}
+              </Toggle>
             ))}
           </ul>
-        </div>
-      </aside>
-      <div className="sm:ml-64 text-left">
-        <h1 className="text-3xl font-bold">Feature: {feature}</h1>
+        </SidebarContent>
+        <SidebarFooter style={{ padding: 10 }}>
+          <Select value={selectedModel} onValueChange={(value) => setSelectedModel(value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select SAE Model" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.keys(SAE_CONFIGS).map((model) => (
+                <SelectItem key={model} value={model}>
+                  {model}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </SidebarFooter>
+      </Sidebar>
+      <main className="text-left max-w-full overflow-x-auto">
+        <h1 className="text-3xl font-bold">Feature {feature}</h1>
         {dimToCuratedMap.has(feature) && <p>{dimToCuratedMap.get(feature)?.desc}</p>}
         {config?.supportsCustomSequence && <CustomViewer feature={feature} />}
         <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg">
@@ -163,8 +130,8 @@ function App() {
             ))}
           </div>
         </div>
-      </div>
-    </div>
+      </main>
+    </SidebarProvider>
   );
 }
 

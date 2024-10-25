@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { residueColor } from "../utils";
-
+import SeqViewer from "./SeqViewer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { sequenceToTokens } from "../utils";
 interface CustomViewerProps {
   feature: number;
 }
@@ -9,6 +12,9 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
   const [activationList, setActivationList] = useState<number[]>([]);
   const [sequence, setSequence] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showStructure, setShowStructure] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+  const submittedSequenceRef = useRef<string>("");
 
   const fetchSAEActivations = async () => {
     if (!sequence) return;
@@ -22,7 +28,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
         },
         body: JSON.stringify({
           input: {
-            sequence: sequence,
+            sequence: sequence.toUpperCase(),
             dim: feature,
           },
         }),
@@ -47,12 +53,14 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
   };
 
   const handleSubmit = async () => {
+    submittedSequenceRef.current = sequence.toUpperCase();
     await fetchSAEActivations();
+    setMessage("");
   };
 
   useEffect(() => {
-    const showStructure = async () => {
-      if (!sequence) return;
+    const renderStructure = async () => {
+      if (!submittedSequenceRef.current) return;
       setIsLoading(true);
       try {
         const response = await fetch("https://api.esmatlas.com/foldSequence/v1/pdb/", {
@@ -60,7 +68,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
           headers: {
             "Content-Type": "text/plain",
           },
-          body: sequence,
+          body: submittedSequenceRef.current.toUpperCase(),
         });
 
         if (!response.ok) {
@@ -68,12 +76,9 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
         }
 
         const pdbData = await response.text();
-
-        // Create a Blob with the PDB data
         const blob = new Blob([pdbData], { type: "text/plain" });
         const blobUrl = URL.createObjectURL(blob);
 
-        // Update the viewer with the new PDB data
         // @ts-expect-error
         const viewerInstance = new PDBeMolstarPlugin();
         const options = {
@@ -92,12 +97,12 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
         const viewerContainer = document.getElementById("custom-viewer");
         viewerInstance.render(viewerContainer, options);
 
-        // Listen for the 'load' event
         viewerInstance.events.loadComplete.subscribe(() => {
           viewerInstance.visual.select({
             data: residueColor(activationList),
             nonSelectedColor: "#ffffff",
           });
+          setMessage("Structure generated with ESMFold.");
         });
       } catch (error) {
         console.error("Error folding sequence:", error);
@@ -106,63 +111,75 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
       }
     };
 
-    if (activationList.length > 0) {
-      showStructure();
+    if (activationList.length === 0) {
+      setShowStructure(false);
+      return;
     }
-  }, [feature, sequence, activationList]);
+    if (activationList.every((act) => act === 0)) {
+      setMessage(
+        "This feature did not activate on your sequence. Try a sequence more similar to ones below."
+      );
+      setShowStructure(false);
+      return;
+    }
+    if (submittedSequenceRef.current.length > 400) {
+      setMessage(
+        "No structure generated. We are folding with ESMFold API which has a limit of 400 residues. Please try a shorter sequence."
+      );
+      setShowStructure(false);
+      return;
+    }
 
+    setShowStructure(true);
+    renderStructure();
+  }, [feature, activationList]);
+
+  // Reset custom viewer state whenever user navigates to a new feature
   useEffect(() => {
     setActivationList([]);
     setSequence("");
     setIsLoading(false);
+    setMessage("");
   }, [feature]);
 
   return (
     <div>
       <div style={{ marginTop: 20 }}>
         <div className="flex overflow-x-auto">
-          <input
+          <Input
             type="text"
+            style={{ marginRight: 10 }}
             value={sequence}
             onChange={(e) => setSequence(e.target.value)}
-            placeholder="Enter protein sequence"
-            style={{
-              width: "100%",
-              padding: "10px",
-              fontSize: "16px",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              marginRight: "10px",
-              outline: "none",
-            }}
+            placeholder="Enter your own protein sequence"
           />
-          <button
-            onClick={handleSubmit}
-            disabled={isLoading || !sequence}
-            style={{
-              padding: "10px 20px",
-              fontSize: "16px",
-              backgroundColor: isLoading || !sequence ? "#ccc" : "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: isLoading || !sequence ? "not-allowed" : "pointer",
-              transition: "background-color 0.3s",
-            }}
-          >
-            {isLoading ? "Loading..." : "Analyze"}
-          </button>
+          <Button onClick={handleSubmit} disabled={isLoading || !sequence}>
+            {isLoading ? "Loading..." : "Submit"}
+          </Button>
         </div>
       </div>
-      <div
-        id="custom-viewer"
-        style={{
-          marginTop: 20,
-          width: "100%",
-          height: activationList.length > 0 ? 400 : 0,
-          position: "relative",
-        }}
-      />
+      {activationList.length > 0 && (
+        <div style={{ margin: 20 }}>
+          <SeqViewer
+            seq={{
+              tokens_acts_list: activationList,
+              tokens_list: sequenceToTokens(submittedSequenceRef.current),
+            }}
+          />
+        </div>
+      )}
+      {showStructure && (
+        <div
+          id="custom-viewer"
+          style={{
+            marginTop: 20,
+            width: "100%",
+            height: activationList.length > 0 ? 400 : 0,
+            position: "relative",
+          }}
+        />
+      )}
+      {message && <small>{message}</small>}
     </div>
   );
 };
