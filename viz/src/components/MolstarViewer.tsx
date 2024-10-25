@@ -108,7 +108,7 @@ const MolstarViewer = ({
         offscreenContainer.style.height = height;
         document.body.appendChild(offscreenContainer);
 
-        const instance = initializeViewer(offscreenContainer, true);
+        const instance = initializeViewer(offscreenContainer);
 
         instance.events.loadComplete.subscribe(() => {
           instance.visual.select({
