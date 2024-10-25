@@ -70,6 +70,7 @@ const SeqViewer: React.FC<SeqViewerProps> = ({ seq }) => {
             <Tooltip>
               <TooltipTrigger>
                 <span
+                  key={`${token}-${color}`}
                   style={{
                     backgroundColor: color,
                     borderRadius: 2,

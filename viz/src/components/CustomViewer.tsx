@@ -14,7 +14,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showStructure, setShowStructure] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
-  const sequenceRef = useRef<string>("");
+  const submittedSequenceRef = useRef<string>("");
 
   const fetchSAEActivations = async () => {
     if (!sequence) return;
@@ -53,14 +53,14 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
   };
 
   const handleSubmit = async () => {
-    sequenceRef.current = sequence;
+    submittedSequenceRef.current = sequence.toUpperCase();
     await fetchSAEActivations();
     setMessage("");
   };
 
   useEffect(() => {
     const renderStructure = async () => {
-      if (!sequenceRef.current) return;
+      if (!submittedSequenceRef.current) return;
       setIsLoading(true);
       try {
         const response = await fetch("https://api.esmatlas.com/foldSequence/v1/pdb/", {
@@ -68,13 +68,12 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
           headers: {
             "Content-Type": "text/plain",
           },
-          body: sequenceRef.current.toUpperCase(),
+          body: submittedSequenceRef.current.toUpperCase(),
         });
 
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        console.log("response", response);
 
         const pdbData = await response.text();
         const blob = new Blob([pdbData], { type: "text/plain" });
@@ -123,7 +122,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
       setShowStructure(false);
       return;
     }
-    if (sequenceRef.current.length > 400) {
+    if (submittedSequenceRef.current.length > 400) {
       setMessage(
         "No structure generated. We are folding with ESMFold API which has a limit of 400 residues. Please try a shorter sequence."
       );
@@ -143,6 +142,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
     setMessage("");
   }, [feature]);
 
+  console.log(activationList);
   return (
     <div>
       <div style={{ marginTop: 20 }}>
@@ -164,7 +164,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
           <SeqViewer
             seq={{
               tokens_acts_list: activationList,
-              tokens_list: sequenceToTokens(sequence.toUpperCase()),
+              tokens_list: sequenceToTokens(submittedSequenceRef.current),
             }}
           />
         </div>
