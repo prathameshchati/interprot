@@ -70,7 +70,7 @@ function App() {
             {config.curated?.map((i) => (
               <Toggle
                 key={`feature-${i.dim}`}
-                style={{ width: "100%", paddingLeft: 20 }}
+                style={{ width: "100%", paddingLeft: 20, textAlign: "left" }}
                 className="justify-start"
                 pressed={feature === i.dim}
                 onPressedChange={() => setFeature(i.dim)}
@@ -92,6 +92,7 @@ function App() {
           </ul>
         </SidebarContent>
         <SidebarFooter style={{ padding: 10 }}>
+          <label>Select SAE Model</label>
           <Select value={selectedModel} onValueChange={(value) => setSelectedModel(value)}>
             <SelectTrigger>
               <SelectValue placeholder="Select SAE Model" />

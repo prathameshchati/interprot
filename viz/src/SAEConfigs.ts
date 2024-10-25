@@ -109,6 +109,31 @@ export const SAE_CONFIGS: {
         desc: "Activates on tryptophan residues",
       },
       { name: "tyrosine", dim: 3481, desc: "Activates on tyrosine residues" },
+      {
+        name: "kinase helix",
+        dim: 594,
+        desc: "Activates strongly on the C-helix in kinase domains and weakly on surrounding beta strands",
+      },
+      {
+        name: "kinase beta strands",
+        dim: 3642,
+        desc: "Activates on some beta strands in kinase domains and weakly on the C-helix",
+      },
+      {
+        name: "middle residues in kinase beta strands",
+        dim: 294,
+        desc: "Activates on the middle residues in kinase domain beta strands",
+      },
+      {
+        name: "kinase beta strand",
+        dim: 3260,
+        desc: "Activates on a beta strand in kinase domains",
+      },
+      {
+        name: "kinase beta strand",
+        dim: 16,
+        desc: "Activates on a beta strand in kinase domains",
+      },
     ],
     defaultDim: 2293,
     supportsCustomSequence: true,

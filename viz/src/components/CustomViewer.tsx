@@ -159,7 +159,7 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
         </div>
       </div>
       {activationList.length > 0 && (
-        <div style={{ margin: 20 }}>
+        <div className="overflow-x-auto" style={{ margin: 20 }}>
           <SeqViewer
             seq={{
               tokens_acts_list: activationList,
