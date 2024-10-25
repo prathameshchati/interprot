@@ -142,7 +142,6 @@ const CustomViewer = ({ feature }: CustomViewerProps) => {
     setMessage("");
   }, [feature]);
 
-  console.log(activationList);
   return (
     <div>
       <div style={{ marginTop: 20 }}>
