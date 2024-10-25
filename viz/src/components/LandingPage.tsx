@@ -4,11 +4,11 @@ import { Link } from "react-router-dom";
 const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <header className="p-4 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold">
+      <header className="p-4 flex flex-col sm:flex-row justify-between items-center">
+        <Link to="/" className="text-2xl font-bold mb-4 sm:mb-0">
           InterProt
         </Link>
-        <nav className="space-x-4">
+        <nav className="space-y-2 sm:space-y-0 sm:space-x-4 flex flex-col sm:flex-row">
           <Link to="/sae-visualizer" className="text-gray-600 hover:text-gray-900">
             Visualizer
           </Link>
@@ -25,13 +25,15 @@ const LandingPage: React.FC = () => {
       </header>
 
       <main className="flex-grow flex flex-col items-center justify-center px-4 text-center">
-        <h1 className="text-4xl font-bold mb-4">Interpreting Proteins through Language Models</h1>
-        <p className="text-xl mb-8 max-w-2xl">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-4">
+          Interpreting Proteins through Language Models
+        </h1>
+        <p className="text-lg sm:text-xl mb-8 max-w-2xl">
           InterProt is an open-source project applying mechanistic interpretability to protein
           language models. The goal is to better understand these models and steer them to design
           new proteins.
         </p>
-        <p className="text-xl mb-8 max-w-2xl">
+        <p className="text-lg sm:text-xl mb-8 max-w-2xl">
           The project was started by{" "}
           <a href="https://etowahadams.com" className="underline">
             Etowah
