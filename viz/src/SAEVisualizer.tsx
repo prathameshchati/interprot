@@ -10,7 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sidebar, SidebarContent, SidebarProvider, SidebarHeader } from "@/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarProvider,
+  SidebarHeader,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
 
@@ -113,7 +119,10 @@ function SAEVisualizer() {
         </SidebarContent>
       </Sidebar>
       <main className="text-left max-w-full overflow-x-auto">
-        <h1 className="text-3xl font-bold">Feature {feature}</h1>
+        <div className="flex items-center justify-between p-4">
+          <SidebarTrigger className="md:hidden" />
+          <h1 className="text-3xl font-bold">Feature {feature}</h1>
+        </div>
         {dimToCuratedMap.has(feature) && <p>{dimToCuratedMap.get(feature)?.desc}</p>}
         {config?.supportsCustomSequence && <CustomViewer feature={feature} />}
         <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { residueColor } from "../utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import proteinEmoji from "../protein.png";
 interface MolstarViewerProps {
@@ -142,7 +143,7 @@ const MolstarViewer = ({
 
     return () => {
       if (viewerInstance) {
-        viewerInstance.dispose();
+        viewerInstance.clear();
       }
       const containerId = `molstar-container-${alphafold_id}`;
       const container = document.getElementById(containerId);
@@ -209,17 +210,26 @@ const MolstarViewer = ({
           </button>
         </>
       ) : imageUrl ? (
-        <img
-          src={imageUrl}
-          alt={`Protein structure ${alphafold_id}`}
-          style={{
-            maxWidth: "100%",
-            maxHeight: "100%",
-            objectFit: "contain",
-            cursor: "pointer",
-          }}
-          title="Click to interact"
-        />
+        <>
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger>
+                <img
+                  src={imageUrl}
+                  alt={`Protein structure ${alphafold_id}`}
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: "100%",
+                    objectFit: "contain",
+                    cursor: "pointer",
+                  }}
+                  title="Click to interact"
+                />
+              </TooltipTrigger>
+              <TooltipContent>Click to interact with the structure</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </>
       ) : (
         <div className="text-red-500">Failed to load visualization after multiple attempts</div>
       )}
