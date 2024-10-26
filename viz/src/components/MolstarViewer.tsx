@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { residueColor } from "../utils";
 import proteinEmoji from "../protein.png";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ProteinData {
   alphafold_id: string;
@@ -11,12 +12,15 @@ interface MolstarViewerProps {
   proteins: ProteinData[];
 }
 
+const MOBILE_RENDER_LIMIT = 3;
+
 const MolstarViewer = ({ proteins }: MolstarViewerProps) => {
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [activeViewers, setActiveViewers] = useState<Set<number>>(new Set());
   const viewerInstancesRef = useRef<Map<number, any>>(new Map());
   const offscreenContainerRef = useRef<HTMLDivElement | null>(null);
   const offscreenViewerRef = useRef<any>(null);
+  const isMobile = useIsMobile();
 
   const initializeOffscreenViewer = () => {
     if (!offscreenContainerRef.current) {
@@ -75,7 +79,8 @@ const MolstarViewer = ({ proteins }: MolstarViewerProps) => {
 
   const renderSequentially = async (proteins: ProteinData[]) => {
     const images: string[] = [];
-    for (const protein of proteins) {
+    const renderSet = isMobile ? proteins.slice(0, MOBILE_RENDER_LIMIT) : proteins;
+    for (const protein of renderSet) {
       const image = await renderToImage(protein);
       images.push(image);
       setPreviewImages([...images]); // Update state after each render
@@ -182,7 +187,7 @@ const MolstarViewer = ({ proteins }: MolstarViewerProps) => {
   return (
     <div className="container mx-auto p-4">
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {proteins.map((protein, index) => (
+        {proteins.slice(0, isMobile ? MOBILE_RENDER_LIMIT: proteins.length).map((protein, index) => (
           <div key={protein.alphafold_id} className="relative aspect-square">
             {activeViewers.has(index) ? (
               <div
