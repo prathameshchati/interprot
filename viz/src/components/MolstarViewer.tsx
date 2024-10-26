@@ -15,18 +15,32 @@ const MolstarViewer = ({ proteins }: MolstarViewerProps) => {
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [activeViewers, setActiveViewers] = useState<Set<number>>(new Set());
   const viewerInstancesRef = useRef<Map<number, any>>(new Map());
+  const offscreenContainerRef = useRef<HTMLDivElement | null>(null);
+  const offscreenViewerRef = useRef<any>(null);
 
-  const renderToImage = async (protein: ProteinData) => {
-    return new Promise<string>((resolve) => {
-      const offscreenContainer = document.createElement("div");
-      offscreenContainer.style.width = "400px";
-      offscreenContainer.style.height = "400px";
-      offscreenContainer.style.position = "absolute";
-      offscreenContainer.style.left = "-9999px";
-      document.body.appendChild(offscreenContainer);
+  const initializeOffscreenViewer = () => {
+    if (!offscreenContainerRef.current) {
+      const container = document.createElement("div");
+      container.style.width = "400px";
+      container.style.height = "400px";
+      container.style.position = "absolute";
+      container.style.left = "-9999px";
+      document.body.appendChild(container);
+      offscreenContainerRef.current = container;
 
       // @ts-expect-error
       const viewer = new PDBeMolstarPlugin();
+      offscreenViewerRef.current = viewer;
+    }
+  };
+
+  const renderToImage = async (protein: ProteinData) => {
+    return new Promise<string>((resolve) => {
+      if (!offscreenContainerRef.current || !offscreenViewerRef.current) {
+        initializeOffscreenViewer();
+      }
+
+      const viewer = offscreenViewerRef.current;
       const options = {
         customData: {
           url: `https://alphafold.ebi.ac.uk/files/AF-${protein.alphafold_id}-F1-model_v4.cif`,
@@ -39,7 +53,7 @@ const MolstarViewer = ({ proteins }: MolstarViewerProps) => {
         landscape: true,
       };
 
-      viewer.render(offscreenContainer, options);
+      viewer.render(offscreenContainerRef.current, options);
       viewer.events.loadComplete.subscribe(() => {
         viewer.visual.select({
           data: residueColor(protein.tokens_acts_list),
@@ -47,12 +61,11 @@ const MolstarViewer = ({ proteins }: MolstarViewerProps) => {
         });
 
         setTimeout(() => {
-          const canvas = offscreenContainer.querySelector("canvas");
+          const canvas = offscreenContainerRef.current?.querySelector("canvas");
           if (canvas) {
             const image = canvas.toDataURL("image/png");
             const ctx = canvas.getContext("2d");
             ctx?.reset();
-            document.body.removeChild(offscreenContainer);
             resolve(image);
           }
         }, 150);
@@ -112,6 +125,17 @@ const MolstarViewer = ({ proteins }: MolstarViewerProps) => {
       }
     });
     viewerInstancesRef.current.clear();
+
+    // Clean up offscreen viewer
+    if (offscreenViewerRef.current?.destroy) {
+      offscreenViewerRef.current.destroy();
+    }
+    if (offscreenContainerRef.current) {
+      document.body.removeChild(offscreenContainerRef.current);
+      offscreenContainerRef.current = null;
+    }
+    offscreenViewerRef.current = null;
+
     setActiveViewers(new Set());
     setPreviewImages([]);
   };
