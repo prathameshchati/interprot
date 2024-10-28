@@ -47,6 +47,10 @@ const CustomStructureViewer = ({
     const renderViewer = (blobUrl: string) => {
       // @ts-expect-error: PDBeMolstarPlugin is not typed
       const viewerInstance = new PDBeMolstarPlugin();
+      const viewerContainer = document.getElementById(viewerId);
+      if (!viewerContainer) {
+        return;
+      }
       const options = {
         customData: {
           url: blobUrl,
@@ -59,7 +63,7 @@ const CustomStructureViewer = ({
         sequencePanel: true,
         landscape: true,
       };
-      const viewerContainer = document.getElementById(viewerId);
+
       viewerInstance.render(viewerContainer, options);
 
       viewerInstance.events.loadComplete.subscribe(() => {
