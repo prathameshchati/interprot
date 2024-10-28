@@ -45,34 +45,41 @@ const CustomStructureViewer = ({
     };
 
     const renderViewer = (blobUrl: string) => {
-      // @ts-expect-error: PDBeMolstarPlugin is not typed
+      // @ts-expect-error: PDBeMolstarPlugin is loaded in as a JS plugin
       const viewerInstance = new PDBeMolstarPlugin();
-      const viewerContainer = document.getElementById(viewerId);
-      if (!viewerContainer) {
-        return;
-      }
-      const options = {
-        customData: {
-          url: blobUrl,
-          format: "pdb",
-        },
-        alphafoldView: false,
-        bgColor: { r: 255, g: 255, b: 255 },
-        hideControls: true,
-        hideCanvasControls: ["selection", "animation", "controlToggle", "controlInfo"],
-        sequencePanel: true,
-        landscape: true,
-      };
 
-      viewerInstance.render(viewerContainer, options);
+      // HACK: Setting a small delay here to ensure that the viewerId div
+      // below is rendered before we try to add stuff to it here. Otherwise
+      // viewerContainer might be null.
+      setTimeout(() => {
+        const viewerContainer = document.getElementById(viewerId);
+        if (!viewerContainer) {
+          return;
+        }
 
-      viewerInstance.events.loadComplete.subscribe(() => {
-        viewerInstance.visual.select({
-          data: residueColor(activations),
-          nonSelectedColor: "#ffffff",
+        const options = {
+          customData: {
+            url: blobUrl,
+            format: "pdb",
+          },
+          alphafoldView: false,
+          bgColor: { r: 255, g: 255, b: 255 },
+          hideControls: true,
+          hideCanvasControls: ["selection", "animation", "controlToggle", "controlInfo"],
+          sequencePanel: true,
+          landscape: true,
+        };
+
+        viewerInstance.render(viewerContainer, options);
+
+        viewerInstance.events.loadComplete.subscribe(() => {
+          viewerInstance.visual.select({
+            data: residueColor(activations),
+            nonSelectedColor: "#ffffff",
+          });
+          setMessage("Structure generated with ESMFold.");
         });
-        setMessage("Structure generated with ESMFold.");
-      });
+      }, 100);
     };
 
     const renderStructure = async () => {
