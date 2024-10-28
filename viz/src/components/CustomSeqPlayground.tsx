@@ -16,14 +16,37 @@ enum PlaygroundState {
   LOADING_STEERED_SEQUENCE,
 }
 
+const initialState = {
+  customSeqActivations: [] as number[],
+  customSeq: "",
+  playgroundState: PlaygroundState.IDLE,
+  steeredSeq: "",
+  steerMultiplier: 1,
+  steeredActivations: [] as number[],
+} as const;
+
 const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
-  const [customSeqActivations, setCustomSeqActivations] = useState<number[]>([]);
-  const [customSeq, setCustomSeq] = useState<string>("");
-  const [playgroundState, setViewerState] = useState<PlaygroundState>(PlaygroundState.IDLE);
-  const [steeredSeq, setSteeredSeq] = useState<string>("");
-  const [steerMultiplier, setSteerMultiplier] = useState(1);
-  const [steeredActivations, setSteeredActivations] = useState<number[]>([]);
+  const [customSeqActivations, setCustomSeqActivations] = useState<number[]>(
+    initialState.customSeqActivations
+  );
+  const [customSeq, setCustomSeq] = useState<string>(initialState.customSeq);
+  const [playgroundState, setViewerState] = useState<PlaygroundState>(initialState.playgroundState);
+  const [steeredSeq, setSteeredSeq] = useState<string>(initialState.steeredSeq);
+  const [steerMultiplier, setSteerMultiplier] = useState<number>(initialState.steerMultiplier);
+  const [steeredActivations, setSteeredActivations] = useState<number[]>(
+    initialState.steeredActivations
+  );
   const submittedSeqRef = useRef<string>("");
+
+  // Reset all state when feature changes
+  useEffect(() => {
+    setCustomSeqActivations(initialState.customSeqActivations);
+    setCustomSeq(initialState.customSeq);
+    setViewerState(initialState.playgroundState);
+    setSteeredSeq(initialState.steeredSeq);
+    setSteerMultiplier(initialState.steerMultiplier);
+    setSteeredActivations(initialState.steeredActivations);
+  }, [feature]);
 
   const fetchSAEActivations = async (seq: string) => {
     try {
@@ -92,6 +115,13 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
 
   const handleSubmit = async () => {
     setViewerState(PlaygroundState.LOADING_SAE_ACTIVATIONS);
+
+    // Reset some states related to downstream actions
+    setCustomSeqActivations(initialState.customSeqActivations);
+    setSteeredSeq(initialState.steeredSeq);
+    setSteerMultiplier(initialState.steerMultiplier);
+    setSteeredActivations(initialState.steeredActivations);
+
     submittedSeqRef.current = customSeq.toUpperCase();
     const saeActivations = await fetchSAEActivations(submittedSeqRef.current);
     setCustomSeqActivations(saeActivations);
@@ -99,22 +129,17 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
 
   const handleSteer = async () => {
     setViewerState(PlaygroundState.LOADING_STEERED_SEQUENCE);
+
+    // Reset some states related to downstream actions
+    setSteeredActivations(initialState.steeredActivations);
+    setSteeredSeq(initialState.steeredSeq);
+
     const steeredSeq = await getSteeredSequence();
     setSteeredSeq(steeredSeq);
     setSteeredActivations(await fetchSAEActivations(steeredSeq));
   };
 
   const onStructureLoad = useCallback(() => setViewerState(PlaygroundState.IDLE), []);
-
-  // Reset playground state whenever user navigates to a new feature
-  useEffect(() => {
-    setCustomSeqActivations([]);
-    setCustomSeq("");
-    setViewerState(PlaygroundState.IDLE);
-    setSteeredSeq("");
-    setSteerMultiplier(1);
-    setSteeredActivations([]);
-  }, [feature]);
 
   return (
     <div>

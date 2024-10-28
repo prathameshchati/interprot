@@ -106,7 +106,7 @@ const CustomStructureViewer = ({
       setIsLoading(false);
       onLoad?.();
     });
-  }, [seq, activations, onLoad, viewerId]);
+  }, [seq, activations, onLoad, viewerId, requireActivations]);
 
   if (!seq || activations.length === 0) return null;
   if (isLoading) {
