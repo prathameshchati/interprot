@@ -62,7 +62,9 @@ function SAEVisualizer() {
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <HomeNavigator />
+          <div className="m-4">
+            <HomeNavigator />
+          </div>
           <Select value={selectedModel} onValueChange={(value) => setSelectedModel(value)}>
             <SelectTrigger>
               <SelectValue placeholder="Select SAE Model" />
