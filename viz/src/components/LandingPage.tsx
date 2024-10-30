@@ -31,7 +31,7 @@ const LandingPage: React.FC = () => {
               <nav className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center space-y-8">
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
+                  className="absolute top-9 right-6 text-gray-600 hover:text-gray-900"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -56,6 +56,13 @@ const LandingPage: React.FC = () => {
                 >
                   GitHub
                 </Link>
+                <Link
+                  to="https://huggingface.co/liambai/InterProt-ESM2-SAEs"
+                  className="text-2xl text-gray-600 hover:text-gray-900"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Hugging Face
+                </Link>
                 <a
                   href="mailto:liambai2000@gmail.com"
                   className="text-2xl text-gray-600 hover:text-gray-900"
@@ -75,6 +82,12 @@ const LandingPage: React.FC = () => {
               className="text-gray-600 hover:text-gray-900"
             >
               GitHub
+            </Link>
+            <Link
+              to="https://huggingface.co/liambai/InterProt-ESM2-SAEs"
+              className="text-gray-600 hover:text-gray-900"
+            >
+              Hugging Face
             </Link>
             <a href="mailto:liambai2000@gmail.com" className="text-gray-600 hover:text-gray-900">
               Contact
