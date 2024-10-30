@@ -16,7 +16,7 @@ interface MolstarViewerProps {
   proteins: ProteinData[];
 }
 
-const PROTEIN_SIZE = 300;
+const PROTEIN_CANVAS_SIZE = 400;
 
 const MolstarMulti: React.FC<MolstarViewerProps> = ({ proteins }) => {
   const [proteinImages, setProteinImages] = useState<(string | null)[]>(Array(proteins.length).fill(null));
@@ -56,8 +56,8 @@ const MolstarMulti: React.FC<MolstarViewerProps> = ({ proteins }) => {
 
   const initViewer = async (element: HTMLDivElement) => {
     const canvas = document.createElement("canvas");
-    canvas.width = PROTEIN_SIZE;
-    canvas.height = PROTEIN_SIZE;
+    canvas.width = PROTEIN_CANVAS_SIZE;
+    canvas.height = PROTEIN_CANVAS_SIZE;
     element.appendChild(canvas);
 
     const spec = DefaultPluginSpec();
@@ -162,7 +162,7 @@ const MolstarMulti: React.FC<MolstarViewerProps> = ({ proteins }) => {
     <div className="container mx-auto p-4">
       <div
         ref={offscreenContainerRef}
-        style={{ width: PROTEIN_SIZE, height: PROTEIN_SIZE, position: "absolute", top: -9999 }}
+        style={{ width: PROTEIN_CANVAS_SIZE, height: PROTEIN_CANVAS_SIZE, position: "absolute", top: -9999 }}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
