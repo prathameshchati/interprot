@@ -1,18 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "../hooks/use-mobile";
+import HomeNavigator from "./HomeNavigator";
 
 const LandingPage: React.FC = () => {
   const isMobile = useIsMobile();
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <header className="p-4 flex flex-col sm:flex-row justify-between items-center">
-        <Link
-          to="/"
-          className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-0 self-start sm:self-auto"
-        >
-          InterProt
-        </Link>
+        <HomeNavigator />
         {!isMobile && (
           <nav className="space-y-2 sm:space-y-0 sm:space-x-4 flex flex-col sm:flex-row">
             <Link to="/sae-visualizer" className="text-gray-600 hover:text-gray-900">
