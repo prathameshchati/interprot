@@ -1,39 +1,46 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useIsMobile } from "../hooks/use-mobile";
 
 const LandingPage: React.FC = () => {
+  const isMobile = useIsMobile();
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <header className="p-4 flex flex-col sm:flex-row justify-between items-center">
-        <Link to="/" className="text-2xl font-bold mb-4 sm:mb-0">
+        <Link
+          to="/"
+          className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-0 self-start sm:self-auto"
+        >
           InterProt
         </Link>
-        <nav className="space-y-2 sm:space-y-0 sm:space-x-4 flex flex-col sm:flex-row">
-          <Link to="/sae-visualizer" className="text-gray-600 hover:text-gray-900">
-            Visualizer
-          </Link>
-          <Link
-            to="https://github.com/etowahadams/plm-interpretability/tree/main"
-            className="text-gray-600 hover:text-gray-900"
-          >
-            GitHub
-          </Link>
-          <a href="mailto:liambai2000@gmail.com" className="text-gray-600 hover:text-gray-900">
-            Contact
-          </a>
-        </nav>
+        {!isMobile && (
+          <nav className="space-y-2 sm:space-y-0 sm:space-x-4 flex flex-col sm:flex-row">
+            <Link to="/sae-visualizer" className="text-gray-600 hover:text-gray-900">
+              Visualizer
+            </Link>
+            <Link
+              to="https://github.com/etowahadams/plm-interpretability/tree/main"
+              className="text-gray-600 hover:text-gray-900"
+            >
+              GitHub
+            </Link>
+            <a href="mailto:liambai2000@gmail.com" className="text-gray-600 hover:text-gray-900">
+              Contact
+            </a>
+          </nav>
+        )}
       </header>
 
       <main className="flex-grow flex flex-col items-center justify-center px-4 text-center">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-4">
+        <h1 className="text-3xl sm:text-4xl font-semibold mb-4">
           Interpreting Proteins through Language Models
         </h1>
-        <p className="text-lg sm:text-xl mb-8 max-w-2xl">
+        <p className="text-base sm:text-xl mb-8 max-w-2xl mt-4 sm:mt-0">
           InterProt is an open-source project applying mechanistic interpretability to protein
           language models. The goal is to better understand these models and steer them to design
           new proteins.
         </p>
-        <p className="text-lg sm:text-xl mb-8 max-w-2xl">
+        <p className="text-base sm:text-xl mb-8 max-w-2xl order-3 sm:order-none">
           The project was started by{" "}
           <a href="https://etowahadams.com" className="underline">
             Etowah
@@ -47,7 +54,7 @@ const LandingPage: React.FC = () => {
         </p>
         <Link
           to="/sae-visualizer"
-          className="bg-black text-white px-6 py-3 rounded text-lg inline-block"
+          className="bg-black text-white px-6 py-3 rounded text-lg inline-block order-2 sm:order-none mb-8"
         >
           SAE Visualizer
         </Link>
