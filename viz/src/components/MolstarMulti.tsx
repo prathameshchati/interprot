@@ -41,15 +41,15 @@ const MolstarMulti: React.FC<MolstarViewerProps> = ({ proteins }) => {
       },
       coloring: {
         getColor(e) {
-          const color = redColorMapRGB(activationList[e], maxValue);
+          const color = maxValue > 0 ? redColorMapRGB(activationList[e], maxValue) : [255, 255, 255];
           return activationList[e] !== undefined
             ? Color.fromRgb(color[0], color[1], color[2])
             : Color.fromRgb(255, 255, 255);
         },
         defaultColor: Color(0x777777),
       },
-      getLabel(e) {
-        return e === 0 ? "Odd stripe" : "Even stripe";
+      getLabel() {
+        return "Activation colors";
       },
     });
   };
