@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useIsMobile } from "../hooks/use-mobile";
 import HomeNavigator from "./HomeNavigator";
 import { useState } from "react";
-
+import { Menu } from "lucide-react";
 const LandingPage: React.FC = () => {
   const isMobile = useIsMobile();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -18,14 +18,7 @@ const LandingPage: React.FC = () => {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-gray-600 hover:text-gray-900"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
+              <Menu />
             </button>
             {isMobileMenuOpen && (
               <nav className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center space-y-8">
@@ -61,7 +54,7 @@ const LandingPage: React.FC = () => {
                   className="text-2xl text-gray-600 hover:text-gray-900"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Hugging Face
+                  Models
                 </Link>
                 <a
                   href="mailto:liambai2000@gmail.com"
@@ -87,7 +80,7 @@ const LandingPage: React.FC = () => {
               to="https://huggingface.co/liambai/InterProt-ESM2-SAEs"
               className="text-gray-600 hover:text-gray-900"
             >
-              Hugging Face
+              Models
             </Link>
             <a href="mailto:liambai2000@gmail.com" className="text-gray-600 hover:text-gray-900">
               Contact
