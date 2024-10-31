@@ -165,7 +165,7 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
       {/* Once we have SAE activations, display sequence and structure */}
       {customSeqActivations.length > 0 && (
         <>
-          <div className="overflow-x-auto" style={{ margin: 20 }}>
+          <div className="overflow-x-auto my-4">
             <SeqViewer
               seq={{
                 tokens_acts_list: customSeqActivations,
@@ -212,7 +212,7 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
 
             {steeredActivations.length > 0 && (
               <>
-                <div className="overflow-x-auto" style={{ margin: 20 }}>
+                <div className="overflow-x-auto my-4">
                   <SeqViewer
                     seq={{
                       tokens_acts_list: steeredActivations,

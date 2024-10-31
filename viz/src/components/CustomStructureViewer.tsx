@@ -206,21 +206,19 @@ const CustomStructureViewer = ({
     );
   }
   return (
-    <>
+    <div>
       {!error && (
-        <div style={{ padding: "16px" }}>
-          <div
-            id={viewerId}
-            style={{
-              width: "100%",
-              height: isMobile ? 300 : 400,
-            }}
-          />
-        </div>
+        <div
+          id={viewerId}
+          style={{
+            width: "100%",
+            height: isMobile ? 300 : 400,
+          }}
+        />
       )}
       {message && <small>{message}</small>}
       {error && <small className="text-red-500">{error}</small>}
-    </>
+    </div>
   );
 };
 
