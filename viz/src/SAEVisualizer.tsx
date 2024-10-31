@@ -25,6 +25,7 @@ import { Toggle } from "./components/ui/toggle";
 import { useSearchParams } from "react-router-dom";
 
 const NUM_SEQS_TO_DISPLAY = 9;
+const SHOW_MODEL_SELECTOR = false;
 
 interface FeatureListProps {
   config: {
@@ -106,24 +107,30 @@ function SAEVisualizer() {
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <div className="m-4">
+          <div className="m-3">
             <HomeNavigator />
           </div>
-          <Select value={selectedModel} onValueChange={(value) => setSelectedModel(value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select SAE Model" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.keys(SAE_CONFIGS).map((model) => (
-                <SelectItem key={model} value={model}>
-                  {model}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="text-sm mt-2 text-left" style={{ paddingLeft: 10, paddingRight: 10 }}>
+          {SHOW_MODEL_SELECTOR && (
+            <Select value={selectedModel} onValueChange={(value) => setSelectedModel(value)}>
+              <SelectTrigger className="mb-3">
+                <SelectValue placeholder="Select SAE Model" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(SAE_CONFIGS).map((model) => (
+                  <SelectItem key={model} value={model}>
+                    {model}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <div className="text-sm text-left px-3 mb-2">
             <p>
-              This SAE was trained on layer {config.plmLayer} of{" "}
+              This{" "}
+              <a href="https://huggingface.co/liambai/InterProt-ESM2-SAEs" className="underline">
+                SAE
+              </a>{" "}
+              was trained on layer {config.plmLayer} of{" "}
               <a href="https://huggingface.co/facebook/esm2_t33_650M_UR50D" className="underline">
                 ESM2-650M
               </a>{" "}
