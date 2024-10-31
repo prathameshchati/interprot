@@ -22,6 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import HomeNavigator from "@/components/HomeNavigator";
 import "./App.css";
 import { Toggle } from "./components/ui/toggle";
+import { useSearchParams } from "react-router-dom";
 
 const NUM_SEQS_TO_DISPLAY = 9;
 
@@ -71,27 +72,24 @@ function FeatureList({ config, feature, setFeature }: FeatureListProps) {
 }
 
 function SAEVisualizer() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [selectedModel, setSelectedModel] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get("model") || "SAE4096-L24";
+    return searchParams.get("model") || "SAE4096-L24";
   });
   const config = SAE_CONFIGS[selectedModel];
   const dimToCuratedMap = new Map(config.curated?.map((i) => [i.dim, i]));
 
   const [feature, setFeature] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return parseInt(params.get("feature") || config.defaultDim.toString(), 10);
+    return parseInt(searchParams.get("feature") || config.defaultDim.toString(), 10);
   });
 
   useEffect(() => {
-    const updateUrl = () => {
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.set("model", selectedModel);
-      newUrl.searchParams.set("feature", feature.toString());
-      window.history.pushState({}, "", newUrl);
-    };
-    updateUrl();
-  }, [config, feature, selectedModel]);
+    setSearchParams({
+      model: selectedModel,
+      feature: feature.toString(),
+    });
+  }, [config, feature, selectedModel, setSearchParams]);
 
   const [featureData, setFeatureData] = useState<SingleSeq[]>([]);
 
