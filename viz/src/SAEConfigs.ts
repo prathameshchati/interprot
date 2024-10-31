@@ -23,7 +23,7 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
       {
         name: "free alpha helices",
         dim: 2293,
-        desc: "Activates on every fourth amino acid in free alpha helices",
+        desc: "Activates on every 4th or 8th amino acid in free alpha helices",
       },
       {
         name: "long alpha helices",
