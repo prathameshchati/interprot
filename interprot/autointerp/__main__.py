@@ -1,7 +1,7 @@
 import click
 
-from plm_interpretability.autointerp.labels2latents import labels2latents
-from plm_interpretability.autointerp.pdb2labels import pdb2labels
+from interprot.autointerp.labels2latents import labels2latents
+from interprot.autointerp.pdb2labels import pdb2labels
 
 
 @click.group()

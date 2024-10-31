@@ -1,5 +1,5 @@
 [project]
-name = "plm-interpretability"
+name = "interprot"
 version = "0.1.0"
 description = "Mechanistic interpretability tools for protein language models"
 authors = [
@@ -21,19 +21,19 @@ readme = "README.md"
 
 [tool.setuptools]
 packages = [
-    "plm_interpretability",
-    "plm_interpretability.autointerp",
-    "plm_interpretability.logistic_regression_probe",
-    "plm_interpretability.make_viz_files",
+    "interprot",
+    "interprot.autointerp",
+    "interprot.logistic_regression_probe",
+    "interprot.make_viz_files",
 ]
 
 [project.scripts]
-autointerp = "plm_interpretability.autointerp.__main__:cli"
-logistic_regression_probe = "plm_interpretability.logistic_regression_probe.__main__:cli"
-make_viz_files = "plm_interpretability.make_viz_files.__main__:make_viz_files"
+autointerp = "interprot.autointerp.__main__:cli"
+logistic_regression_probe = "interprot.logistic_regression_probe.__main__:cli"
+make_viz_files = "interprot.make_viz_files.__main__:make_viz_files"
 
 [project.urls]
-Homepage = "https://github.com/etowahadams/plm-interpretability"
+Homepage = "https://github.com/etowahadams/interprot"
 
 [build-system]
 requires = ["hatchling"]
@@ -61,7 +61,7 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = [
-    "plm_interpretability",
-    "plm_interpretability.autointerp",
-    "plm_interpretability.logistic_regression_probe"
+    "interprot",
+    "interprot.autointerp",
+    "interprot.logistic_regression_probe"
 ]

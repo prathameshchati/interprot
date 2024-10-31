@@ -1,6 +1,6 @@
-# pLM Interpretability
+# InterProt
 
-This repo contains tools used to interpret protein language models. `viz` contains the frontend app for visualizing SAE features. `plm_interpretability` is a python package containing tools for SAE training and interpretation.
+This repo contains tools used to interpret protein language models. `viz` contains the frontend app for visualizing SAE features. `interprot` is a python package containing tools for SAE training and interpretation.
 
 ## The visualizer
 
@@ -16,16 +16,16 @@ pnpm run dev
 
 ```bash
 docker compose build
-docker compose run --rm plm-interpretability bash
+docker compose run --rm interprot bash
 pytest
 ```
 
 ### Running commands
 
-Each directory under `plm_interpretability` contains a command-line tool. For example, `make_viz_files` takes in an SAE checkpoint and generates JSON files containing SAE activations used to serve the visualizer. You can run it with
+Each directory under `interprot` contains a command-line tool. For example, `make_viz_files` takes in an SAE checkpoint and generates JSON files containing SAE activations used to serve the visualizer. You can run it with
 
 ```bash
-cd plm_interpretability
+cd interprot
 python -m make_viz_files \
     --checkpoint-files <path to checkpoint> \
     --output-dir <path to output directory where the JSON files will be saved>

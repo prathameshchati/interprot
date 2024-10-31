@@ -6,19 +6,19 @@ import pandas as pd
 from click.testing import CliRunner
 from sklearn.model_selection import train_test_split
 
-from plm_interpretability.logistic_regression_probe.single_latent import single_latent
+from interprot.logistic_regression_probe.single_latent import single_latent
 
 
 class TestSingleLatentProbe(unittest.TestCase):
     @patch(
-        "plm_interpretability.logistic_regression_probe.single_latent.prepare_arrays_for_logistic_regression"
+        "interprot.logistic_regression_probe.single_latent.prepare_arrays_for_logistic_regression"
     )
-    @patch("plm_interpretability.logistic_regression_probe.single_latent.torch.load")
+    @patch("interprot.logistic_regression_probe.single_latent.torch.load")
     @patch(
-        "plm_interpretability.logistic_regression_probe.single_latent.AutoTokenizer.from_pretrained"
+        "interprot.logistic_regression_probe.single_latent.AutoTokenizer.from_pretrained"
     )
-    @patch("plm_interpretability.logistic_regression_probe.single_latent.EsmModel.from_pretrained")
-    @patch("plm_interpretability.logistic_regression_probe.single_latent.SparseAutoencoder")
+    @patch("interprot.logistic_regression_probe.single_latent.EsmModel.from_pretrained")
+    @patch("interprot.logistic_regression_probe.single_latent.SparseAutoencoder")
     def test_single_latent_e2e(
         self,
         mock_sae,

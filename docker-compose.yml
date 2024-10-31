@@ -1,5 +1,5 @@
 services:
-  plm-interpretability:
+  interprot:
     build: .
     volumes:
       - .:/app

@@ -9,7 +9,7 @@ certifi==2024.8.30
 charset-normalizer==3.3.2
     # via requests
 click==8.1.7
-    # via plm-interpretability (pyproject.toml)
+    # via interprot (pyproject.toml)
 filelock==3.16.0
     # via
     #   huggingface-hub
@@ -40,7 +40,7 @@ networkx==3.3
 numpy==1.26.4
     # via
     #   pandas
-    #   plm-interpretability (pyproject.toml)
+    #   interprot (pyproject.toml)
     #   scikit-learn
     #   scipy
     #   transformers
@@ -50,13 +50,13 @@ packaging==24.1
     #   pytest
     #   transformers
 pandas==2.2.3
-    # via plm-interpretability (pyproject.toml)
+    # via interprot (pyproject.toml)
 pluggy==1.5.0
     # via pytest
 polars==1.7.1
-    # via plm-interpretability (pyproject.toml)
+    # via interprot (pyproject.toml)
 pytest==8.3.3
-    # via plm-interpretability (pyproject.toml)
+    # via interprot (pyproject.toml)
 python-dateutil==2.9.0.post0
     # via pandas
 pytz==2024.2
@@ -74,7 +74,7 @@ requests==2.32.3
 safetensors==0.4.5
     # via transformers
 scikit-learn==1.5.2
-    # via plm-interpretability (pyproject.toml)
+    # via interprot (pyproject.toml)
 scipy==1.14.1
     # via scikit-learn
 six==1.16.0
@@ -86,14 +86,14 @@ threadpoolctl==3.5.0
 tokenizers==0.19.1
     # via transformers
 torch==2.2.2
-    # via plm-interpretability (pyproject.toml)
+    # via interprot (pyproject.toml)
 tqdm==4.66.5
     # via
     #   huggingface-hub
-    #   plm-interpretability (pyproject.toml)
+    #   interprot (pyproject.toml)
     #   transformers
 transformers==4.44.2
-    # via plm-interpretability (pyproject.toml)
+    # via interprot (pyproject.toml)
 typing-extensions==4.12.2
     # via
     #   huggingface-hub

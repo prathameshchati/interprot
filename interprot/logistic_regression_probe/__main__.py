@@ -1,7 +1,7 @@
 import click
 
-from plm_interpretability.logistic_regression_probe.all_latents import all_latents
-from plm_interpretability.logistic_regression_probe.single_latent import single_latent
+from interprot.logistic_regression_probe.all_latents import all_latents
+from interprot.logistic_regression_probe.single_latent import single_latent
 
 
 @click.group()

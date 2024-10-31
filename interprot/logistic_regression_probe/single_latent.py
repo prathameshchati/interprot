@@ -14,15 +14,15 @@ from sklearn.metrics import f1_score, precision_score, recall_score
 from tqdm import tqdm
 from transformers import AutoTokenizer, EsmModel
 
-from plm_interpretability.logistic_regression_probe.annotations import (
+from interprot.logistic_regression_probe.annotations import (
     RESIDUE_ANNOTATION_NAMES,
     RESIDUE_ANNOTATIONS,
 )
-from plm_interpretability.logistic_regression_probe.logging import logger
-from plm_interpretability.logistic_regression_probe.utils import (
+from interprot.logistic_regression_probe.logging import logger
+from interprot.logistic_regression_probe.utils import (
     prepare_arrays_for_logistic_regression,
 )
-from plm_interpretability.sae_model import SparseAutoencoder
+from interprot.sae_model import SparseAutoencoder
 
 
 def augment_df_with_aa_identity(df: pd.DataFrame) -> pd.DataFrame:

@@ -11,10 +11,10 @@ import pandas as pd
 from tqdm import tqdm
 from transformers import AutoTokenizer, EsmModel
 
-from plm_interpretability.logistic_regression_probe.annotations import ResidueAnnotation
-from plm_interpretability.logistic_regression_probe.logging import logger
-from plm_interpretability.sae_model import SparseAutoencoder
-from plm_interpretability.utils import get_layer_activations, parse_swissprot_annotation
+from interprot.logistic_regression_probe.annotations import ResidueAnnotation
+from interprot.logistic_regression_probe.logging import logger
+from interprot.sae_model import SparseAutoencoder
+from interprot.utils import get_layer_activations, parse_swissprot_annotation
 
 MAX_SEQ_LEN = 1000
 
