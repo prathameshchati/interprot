@@ -1,13 +1,19 @@
-export const SAE_CONFIGS: {
-  [key: string]: {
-    baseUrl: string;
-    numHiddenDims: number;
-    plmLayer: number;
-    curated?: { name: string; dim: number; desc: string }[];
-    defaultDim: number;
-    supportsCustomSequence?: boolean;
-  };
-} = {
+export type CuratedFeature = {
+  name: string;
+  dim: number;
+  desc: string;
+};
+
+export type SAEConfig = {
+  baseUrl: string;
+  numHiddenDims: number;
+  plmLayer: number;
+  curated?: CuratedFeature[];
+  defaultDim: number;
+  supportsCustomSequence?: boolean;
+};
+
+export const SAE_CONFIGS: Record<string, SAEConfig> = {
   "SAE4096-L24": {
     baseUrl:
       "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l24_sae4096_100Kseqs/",

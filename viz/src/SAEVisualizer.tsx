@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-// import MolstarViewer from "./components/MolstarViewer";
-import MolstarMulti from './components/MolstarMulti';
+import MolstarMulti from "./components/MolstarMulti";
 import SeqViewer, { SingleSeq } from "./components/SeqViewer";
 import CustomSeqPlayground from "./components/CustomSeqPlayground";
-import { SAE_CONFIGS } from "./SAEConfigs";
+import { CuratedFeature, SAE_CONFIGS } from "./SAEConfigs";
 import {
   Select,
   SelectContent,
@@ -17,6 +16,7 @@ import {
   SidebarProvider,
   SidebarHeader,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import HomeNavigator from "@/components/HomeNavigator";
@@ -24,6 +24,51 @@ import "./App.css";
 import { Toggle } from "./components/ui/toggle";
 
 const NUM_SEQS_TO_DISPLAY = 9;
+
+interface FeatureListProps {
+  config: {
+    curated?: CuratedFeature[];
+    numHiddenDims: number;
+  };
+  feature: number;
+  setFeature: (feature: number) => void;
+}
+
+function FeatureList({ config, feature, setFeature }: FeatureListProps) {
+  const { setOpenMobile } = useSidebar();
+
+  const handleFeatureChange = (feature: number) => {
+    setFeature(feature);
+    setOpenMobile(false);
+  };
+
+  return (
+    <ul className="space-y-2 font-medium">
+      {config.curated?.map((c) => (
+        <Toggle
+          key={`feature-${c.dim}`}
+          style={{ width: "100%", paddingLeft: 20, textAlign: "left" }}
+          className="justify-start"
+          pressed={feature === c.dim}
+          onPressedChange={() => handleFeatureChange(c.dim)}
+        >
+          {c.name}
+        </Toggle>
+      ))}
+      {Array.from({ length: config.numHiddenDims }, (_, i) => i).map((i) => (
+        <Toggle
+          key={`feature-${i}`}
+          style={{ width: "100%", paddingLeft: 20 }}
+          className="justify-start"
+          pressed={feature === i}
+          onPressedChange={() => handleFeatureChange(i)}
+        >
+          {i}
+        </Toggle>
+      ))}
+    </ul>
+  );
+}
 
 function SAEVisualizer() {
   const [selectedModel, setSelectedModel] = useState(() => {
@@ -91,30 +136,7 @@ function SAEVisualizer() {
           <Separator />
         </SidebarHeader>
         <SidebarContent>
-          <ul className="space-y-2 font-medium">
-            {config.curated?.map((i) => (
-              <Toggle
-                key={`feature-${i.dim}`}
-                style={{ width: "100%", paddingLeft: 20, textAlign: "left" }}
-                className="justify-start"
-                pressed={feature === i.dim}
-                onPressedChange={() => setFeature(i.dim)}
-              >
-                {i.name}
-              </Toggle>
-            ))}
-            {Array.from({ length: config.numHiddenDims }, (_, i) => i).map((i) => (
-              <Toggle
-                key={`feature-${i}`}
-                style={{ width: "100%", paddingLeft: 20 }}
-                className="justify-start"
-                pressed={feature === i}
-                onPressedChange={() => setFeature(i)}
-              >
-                {i}
-              </Toggle>
-            ))}
-          </ul>
+          <FeatureList config={config} feature={feature} setFeature={setFeature} />
         </SidebarContent>
       </Sidebar>
       <main className="text-left max-w-full overflow-x-auto">
