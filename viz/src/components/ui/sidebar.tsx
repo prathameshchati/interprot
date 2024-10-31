@@ -251,6 +251,7 @@ const SidebarTrigger = React.forwardRef<
   React.ComponentProps<typeof Button>
 >(({ className, ...props }) => {
   const { toggleSidebar } = useSidebar();
+  // @ts-expect-error some weird type issues
   return <Menu size={26} className={className} onClick={toggleSidebar} {...props} />;
 });
 SidebarTrigger.displayName = "SidebarTrigger";
