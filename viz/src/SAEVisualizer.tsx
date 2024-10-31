@@ -140,11 +140,19 @@ function SAEVisualizer() {
         </SidebarContent>
       </Sidebar>
       <main className="text-left max-w-full overflow-x-auto">
-        <div className="flex items-center justify-between p-4">
-          <SidebarTrigger className="md:hidden" />
-          <h1 className="text-3xl font-bold">Feature {feature}</h1>
+        {/* HACK to make the divider extend the entire width of the screen */}
+        <div
+          className="fixed top-0 w-full bg-background border-b border-border z-50 py-4 px-8 md:hidden"
+          style={{ marginLeft: -28, width: "calc(100% + 56px)" }}
+        >
+          <div className="flex items-center justify-between">
+            <SidebarTrigger />
+          </div>
         </div>
-        {dimToCuratedMap.has(feature) && <p>{dimToCuratedMap.get(feature)?.desc}</p>}
+        <h1 className="text-3xl font-semibold md:mt-0 mt-16">Feature {feature}</h1>
+        {dimToCuratedMap.has(feature) && (
+          <p className="mt-2">{dimToCuratedMap.get(feature)?.desc}</p>
+        )}
         {config?.supportsCustomSequence && <CustomSeqPlayground feature={feature} />}
         <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg">
           <div className="overflow-x-auto">

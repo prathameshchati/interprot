@@ -79,14 +79,36 @@ const CustomStructureViewer = ({
     };
 
     const renderViewer = async (pdbData: string) => {
-      // Add a small delay to ensure that the viewerId div is loaded
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Wait for the element to be available in the DOM
+      const waitForElement = () => {
+        return new Promise<HTMLElement>((resolve, reject) => {
+          const element = document.getElementById(viewerId);
+          if (element) {
+            resolve(element);
+            return;
+          }
 
-      const container = document.getElementById(viewerId);
-      if (!container) {
-        console.error("Container not found");
-        return;
-      }
+          const observer = new MutationObserver(() => {
+            const element = document.getElementById(viewerId);
+            if (element) {
+              observer.disconnect();
+              resolve(element);
+            }
+          });
+
+          observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+          });
+
+          setTimeout(() => {
+            observer.disconnect();
+            reject(new Error("Structure viewer element not found after timeout"));
+          }, 5000);
+        });
+      };
+
+      const container = await waitForElement();
       container.innerHTML = "";
 
       const canvas = document.createElement("canvas");
