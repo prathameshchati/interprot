@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { redColorMap, tokenToResidue } from "../utils";
+import { redColorMapHex, tokenToResidue } from "../utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { tokensToSequence } from "../utils";
 
@@ -79,7 +79,7 @@ const SeqViewer: React.FC<SeqViewerProps> = ({ seq }) => {
         </TooltipProvider>
       )}
       {tokensToShow.map((token, index) => {
-        const color = redColorMap(activationsToShow[index], maxValue);
+        const color = redColorMapHex(activationsToShow[index], maxValue);
         const tokenChar = tokenToResidue(token);
         return (
           <TooltipProvider key={`token-${index}`} delayDuration={100}>

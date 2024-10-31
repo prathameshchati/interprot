@@ -1,5 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { residueColor } from "../utils";
+import { DefaultPluginSpec } from "molstar/lib/mol-plugin/spec";
+import { PluginContext } from "molstar/lib/mol-plugin/context";
+import { CustomElementProperty } from "molstar/lib/mol-model-props/common/custom-element-property";
+import { Model, ElementIndex } from "molstar/lib/mol-model/structure";
+import { Color } from "molstar/lib/mol-util/color";
+import { redColorMapRGB } from "../utils";
 import proteinEmoji from "../protein.png";
 
 interface CustomStructureViewerProps {
@@ -21,6 +26,36 @@ const CustomStructureViewer = ({
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const ESMFoldCache = useRef<Record<string, string>>({});
+  const pluginRef = useRef<PluginContext | null>(null);
+
+  const createResidueColorTheme = (activationList: number[], name = "residue-colors") => {
+    const maxValue = Math.max(...activationList);
+    return CustomElementProperty.create({
+      label: "Residue Colors",
+      name,
+      getData(model: Model) {
+        const map = new Map<ElementIndex, number>();
+        const residueIndex = model.atomicHierarchy.residueAtomSegments.index;
+        for (let i = 0, _i = model.atomicHierarchy.atoms._rowCount; i < _i; i++) {
+          map.set(i as ElementIndex, residueIndex[i]);
+        }
+        return { value: map };
+      },
+      coloring: {
+        getColor(e) {
+          const color =
+            maxValue > 0 ? redColorMapRGB(activationList[e], maxValue) : [255, 255, 255];
+          return activationList[e] !== undefined
+            ? Color.fromRgb(color[0], color[1], color[2])
+            : Color.fromRgb(255, 255, 255);
+        },
+        defaultColor: Color(0x777777),
+      },
+      getLabel() {
+        return "Activation colors";
+      },
+    });
+  };
 
   useEffect(() => {
     const foldStructure = async (sequence: string) => {
@@ -33,53 +68,65 @@ const CustomStructureViewer = ({
       });
 
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error(`Network response was not ok: ${response.status}`);
       }
 
-      return await response.text();
+      const pdbData = await response.text();
+      return pdbData;
     };
 
-    const createBlobUrl = (data: string) => {
-      const blob = new Blob([data], { type: "text/plain" });
-      return URL.createObjectURL(blob);
-    };
+    const renderViewer = async (pdbData: string) => {
+      // Add a small delay to ensure that the viewerId div is loaded
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-    const renderViewer = (blobUrl: string) => {
-      // @ts-expect-error: PDBeMolstarPlugin is loaded in as a JS plugin
-      const viewerInstance = new PDBeMolstarPlugin();
+      const container = document.getElementById(viewerId);
+      if (!container) {
+        console.error("Container not found");
+        return;
+      }
+      container.innerHTML = "";
 
-      // HACK: Setting a small delay here to ensure that the viewerId div
-      // below is rendered before we try to add stuff to it here. Otherwise
-      // viewerContainer might be null.
-      setTimeout(() => {
-        const viewerContainer = document.getElementById(viewerId);
-        if (!viewerContainer) {
-          return;
-        }
+      const canvas = document.createElement("canvas");
+      container.appendChild(canvas);
 
-        const options = {
-          customData: {
-            url: blobUrl,
-            format: "pdb",
-          },
-          alphafoldView: false,
-          bgColor: { r: 255, g: 255, b: 255 },
-          hideControls: true,
-          hideCanvasControls: ["selection", "animation", "controlToggle", "controlInfo"],
-          sequencePanel: true,
-          landscape: true,
-        };
+      const plugin = new PluginContext(DefaultPluginSpec());
+      pluginRef.current = plugin;
 
-        viewerInstance.render(viewerContainer, options);
+      await plugin.init();
+      plugin.initViewer(canvas, container as HTMLDivElement);
 
-        viewerInstance.events.loadComplete.subscribe(() => {
-          viewerInstance.visual.select({
-            data: residueColor(activations),
-            nonSelectedColor: "#ffffff",
-          });
-          setMessage("Structure generated with ESMFold.");
+      const themeName = Math.random().toString(36).substring(7);
+      const ResidueColorTheme = createResidueColorTheme(activations, themeName);
+      plugin.representation.structure.themes.colorThemeRegistry.add(
+        ResidueColorTheme.colorThemeProvider!
+      );
+
+      try {
+        const blob = new Blob([pdbData], { type: "text/plain" });
+        const blobUrl = URL.createObjectURL(blob);
+        const structureData = await plugin.builders.data.download({
+          url: blobUrl,
+          isBinary: false,
+          label: "Structure",
         });
-      }, 100);
+        URL.revokeObjectURL(blobUrl);
+
+        const trajectory = await plugin.builders.structure.parseTrajectory(structureData, "pdb");
+        await plugin.builders.structure.hierarchy.applyPreset(trajectory, "default");
+
+        plugin.dataTransaction(async () => {
+          for (const s of plugin.managers.structure.hierarchy.current.structures) {
+            await plugin.managers.structure.component.updateRepresentationsTheme(s.components, {
+              color: ResidueColorTheme.propertyProvider.descriptor.name as any,
+            });
+          }
+        });
+
+        setMessage("Structure generated with ESMFold.");
+      } catch (error) {
+        console.error("Error loading structure:", error);
+        setError("An error occurred while loading the structure.");
+      }
     };
 
     const renderStructure = async () => {
@@ -87,8 +134,7 @@ const CustomStructureViewer = ({
       try {
         const pdbData = ESMFoldCache.current[seq] || (await foldStructure(seq));
         ESMFoldCache.current[seq] = pdbData;
-        const blobUrl = createBlobUrl(pdbData);
-        renderViewer(blobUrl);
+        renderViewer(pdbData);
       } catch (error) {
         console.error("Error folding sequence:", error);
         setError("An error occurred while folding the sequence with ESMFold.");
@@ -117,6 +163,13 @@ const CustomStructureViewer = ({
       setIsLoading(false);
       onLoad?.();
     });
+
+    return () => {
+      if (pluginRef.current) {
+        pluginRef.current.dispose();
+        pluginRef.current = null;
+      }
+    };
   }, [seq, activations, onLoad, viewerId, requireActivations]);
 
   if (!seq || activations.length === 0) return null;

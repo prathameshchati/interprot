@@ -19,7 +19,9 @@ interface MolstarViewerProps {
 const PROTEIN_CANVAS_SIZE = 400;
 
 const MolstarMulti: React.FC<MolstarViewerProps> = ({ proteins }) => {
-  const [proteinImages, setProteinImages] = useState<(string | null)[]>(Array(proteins.length).fill(null));
+  const [proteinImages, setProteinImages] = useState<(string | null)[]>(
+    Array(proteins.length).fill(null)
+  );
   const [activeViewerIndices, setActiveViewerIndices] = useState<Set<number>>(new Set());
   const pluginRef = useRef<PluginContext | null>(null);
   const activePluginsRef = useRef<Map<number, PluginContext>>(new Map());
@@ -41,7 +43,8 @@ const MolstarMulti: React.FC<MolstarViewerProps> = ({ proteins }) => {
       },
       coloring: {
         getColor(e) {
-          const color = maxValue > 0 ? redColorMapRGB(activationList[e], maxValue) : [255, 255, 255];
+          const color =
+            maxValue > 0 ? redColorMapRGB(activationList[e], maxValue) : [255, 255, 255];
           return activationList[e] !== undefined
             ? Color.fromRgb(color[0], color[1], color[2])
             : Color.fromRgb(255, 255, 255);
@@ -68,7 +71,12 @@ const MolstarMulti: React.FC<MolstarViewerProps> = ({ proteins }) => {
     return plugin;
   };
 
-  const loadStructure = async (plugin: PluginContext, protein: ProteinData, index: number, isInteractive: boolean = false) => {
+  const loadStructure = async (
+    plugin: PluginContext,
+    protein: ProteinData,
+    index: number,
+    isInteractive: boolean = false
+  ) => {
     try {
       const fileName = `https://alphafold.ebi.ac.uk/files/AF-${protein.alphafold_id}-F1-model_v4.cif`;
 
@@ -99,8 +107,8 @@ const MolstarMulti: React.FC<MolstarViewerProps> = ({ proteins }) => {
         const canvas = offscreenContainerRef.current?.querySelector("canvas");
         if (!canvas) throw new Error("Canvas not found");
         const imageUrl = canvas.toDataURL("image/png");
-        
-        setProteinImages(prev => {
+
+        setProteinImages((prev) => {
           const newImages = [...prev];
           newImages[index] = imageUrl;
           return newImages;
@@ -141,7 +149,7 @@ const MolstarMulti: React.FC<MolstarViewerProps> = ({ proteins }) => {
       const plugin = await initViewer(viewerContainer);
       activePluginsRef.current.set(index, plugin);
       await loadStructure(plugin, proteins[index], index, true);
-      setActiveViewerIndices(prev => {
+      setActiveViewerIndices((prev) => {
         const newSet = new Set(prev);
         newSet.add(index);
         return newSet;
@@ -154,7 +162,7 @@ const MolstarMulti: React.FC<MolstarViewerProps> = ({ proteins }) => {
   useEffect(() => {
     setProteinImages(Array(proteins.length).fill(null));
     activeViewerIndices.clear();
-    activePluginsRef.current.forEach(plugin => plugin.dispose());
+    activePluginsRef.current.forEach((plugin) => plugin.dispose());
     renderProteins();
   }, [proteins]);
 
@@ -162,7 +170,12 @@ const MolstarMulti: React.FC<MolstarViewerProps> = ({ proteins }) => {
     <div className="container mx-auto p-4">
       <div
         ref={offscreenContainerRef}
-        style={{ width: PROTEIN_CANVAS_SIZE, height: PROTEIN_CANVAS_SIZE, position: "absolute", top: -9999 }}
+        style={{
+          width: PROTEIN_CANVAS_SIZE,
+          height: PROTEIN_CANVAS_SIZE,
+          position: "absolute",
+          top: -9999,
+        }}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -171,7 +184,7 @@ const MolstarMulti: React.FC<MolstarViewerProps> = ({ proteins }) => {
             key={protein.alphafold_id}
             className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer"
             onClick={() => handleProteinClick(index)}
-            ref={el => viewerContainerRefs.current[index] = el}
+            ref={(el) => (viewerContainerRefs.current[index] = el)}
           >
             {activeViewerIndices.has(index) ? (
               <></>
