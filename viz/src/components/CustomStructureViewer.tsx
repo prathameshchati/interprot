@@ -6,6 +6,7 @@ import { Model, ElementIndex } from "molstar/lib/mol-model/structure";
 import { Color } from "molstar/lib/mol-util/color";
 import { redColorMapRGB } from "../utils";
 import proteinEmoji from "../protein.png";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CustomStructureViewerProps {
   viewerId: string;
@@ -25,6 +26,8 @@ const CustomStructureViewer = ({
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const isMobile = useIsMobile();
+
   const ESMFoldCache = useRef<Record<string, string>>({});
   const pluginRef = useRef<PluginContext | null>(null);
 
@@ -183,15 +186,15 @@ const CustomStructureViewer = ({
   return (
     <>
       {!error && (
-        <div
-          id={viewerId}
-          style={{
-            marginTop: 20,
-            width: "100%",
-            height: 400,
-            position: "relative",
-          }}
-        />
+        <div style={{ padding: "16px" }}>
+          <div
+            id={viewerId}
+            style={{
+              width: "100%",
+              height: isMobile ? 300 : 400,
+            }}
+          />
+        </div>
       )}
       {message && <small>{message}</small>}
       {error && <small className="text-red-500">{error}</small>}
