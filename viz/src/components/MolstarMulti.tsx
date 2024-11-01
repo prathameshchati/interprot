@@ -6,6 +6,7 @@ import { Model, ElementIndex } from "molstar/lib/mol-model/structure";
 import { Color } from "molstar/lib/mol-util/color";
 import proteinEmoji from "../protein.png";
 import { redColorMapRGB } from "@/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ProteinData {
   alphafold_id: string;
@@ -189,16 +190,21 @@ const MolstarMulti: React.FC<MolstarViewerProps> = ({ proteins }) => {
             {activeViewerIndices.has(index) ? (
               <></>
             ) : proteinImages[index] ? (
-              <>
-                <img
-                  src={proteinImages[index]!}
-                  alt={`Protein ${protein.alphafold_id}`}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
-                  {protein.alphafold_id}
-                </div>
-              </>
+              <TooltipProvider delayDuration={100}>
+                <Tooltip>
+                  <TooltipTrigger className="w-full h-full">
+                    <img
+                      src={proteinImages[index]!}
+                      alt={`Protein ${protein.alphafold_id}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+                      {protein.alphafold_id}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>Click to interact with the structure</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             ) : (
               <div className="flex flex-col items-center justify-center w-full h-full bg-white">
                 <img
