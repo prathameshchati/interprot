@@ -188,12 +188,57 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
         playgroundState !== PlaygroundState.LOADING_SAE_ACTIVATIONS && (
           <div style={{ marginTop: 20 }}>
             <h3 className="text-xl font-bold mb-4">Steering</h3>
+            <div className="bg-gray-50 p-4 rounded-lg mb-4">
+              <p className="mb-2 text-sm">Steering increases this feature's activation.</p>
+              <p className="mb-2 text-sm">
+                We were inspired by{" "}
+                <a
+                  href="https://transformer-circuits.pub/2024/scaling-monosemanticity/index.html#assessing-tour-influence"
+                  className="underline"
+                >
+                  Anthropic's work
+                </a>{" "}
+                on LLM steering and getting Claude to admit that it is the Golden Gate Bridge.
+              </p>
+              <p className="mb-2 text-sm">
+                Following{" "}
+                <a
+                  href="https://transformer-circuits.pub/2024/scaling-monosemanticity/index.html#appendix-methods-steering"
+                  className="underline"
+                >
+                  their implementation
+                </a>
+                , we reconstruct the input sequence with the SAE "spliced into" ESM2 at layer 24.
+                With steering multiplier N, the SAE activation at every residue in the sequence is
+                set to N * (max activation along the sequence). So,
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-sm mb-2">
+                <li>N = 0 {String.fromCharCode(8594)} setting this feature to 0</li>
+                <li>
+                  N = 1 {String.fromCharCode(8594)} amplifying this feature by setting its
+                  activation at each residue to the max activation along the sequence
+                </li>
+              </ul>
+              <p className="text-sm">
+                Check out{" "}
+                <a
+                  href="https://transformer-circuits.pub/2024/scaling-monosemanticity/index.html#appendix-methods-steering"
+                  className="underline"
+                >
+                  this explanation
+                </a>{" "}
+                from Anthropic for more technical details. We're experimenting with different
+                methods of steering and will make them available soon!
+              </p>
+            </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <span className="whitespace-nowrap">Steer multiplier: {steerMultiplier}</span>
+              <span className="whitespace-nowrap font-bold">
+                Steer multiplier: {steerMultiplier}
+              </span>
               <div className="flex-grow">
                 <Slider
                   defaultValue={[1]}
-                  min={-5}
+                  min={0}
                   max={5}
                   step={0.1}
                   value={[steerMultiplier]}
