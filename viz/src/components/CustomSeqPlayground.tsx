@@ -206,74 +206,88 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
                   href="https://transformer-circuits.pub/2024/scaling-monosemanticity/index.html#appendix-methods-steering"
                   className="underline"
                 >
-                  their implementation
+                  their approach
                 </a>
                 , we reconstruct the input sequence with the SAE "spliced into" ESM2 at layer 24.
                 With steering multiplier N, the SAE activation at every residue in the sequence is
                 set to N * (max activation along the sequence). So,
               </p>
               <ul className="list-disc list-inside space-y-2 text-sm mb-2">
-                <li>N = 0 {String.fromCharCode(8594)} setting this feature to 0</li>
+                <li>N = 0 {String.fromCharCode(8594)} setting the feature to 0</li>
                 <li>
-                  N = 1 {String.fromCharCode(8594)} amplifying this feature by setting its
-                  activation at each residue to the max activation along the sequence
+                  N = 1 {String.fromCharCode(8594)} amplifying the feature by setting its activation
+                  at each residue to the max activation along the sequence
                 </li>
               </ul>
               <p className="text-sm">
-                Check out{" "}
-                <a
-                  href="https://transformer-circuits.pub/2024/scaling-monosemanticity/index.html#appendix-methods-steering"
-                  className="underline"
-                >
-                  this explanation
-                </a>{" "}
-                from Anthropic for more technical details. We're experimenting with different
-                methods of steering and will make them available soon!
+                We're experimenting with different methods of steering and will make them available
+                soon!
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <span className="whitespace-nowrap font-bold">
-                Steer multiplier: {steerMultiplier}
-              </span>
-              <div className="flex-grow">
-                <Slider
-                  defaultValue={[1]}
-                  min={0}
-                  max={5}
-                  step={0.1}
-                  value={[steerMultiplier]}
-                  onValueChange={(value) => setSteerMultiplier(value[0])}
-                />
-              </div>
-              <Button
-                onClick={handleSteer}
-                disabled={playgroundState === PlaygroundState.LOADING_STEERED_SEQUENCE}
-              >
-                {playgroundState === PlaygroundState.LOADING_STEERED_SEQUENCE
-                  ? "Loading..."
-                  : "Steer"}
-              </Button>
-            </div>
-
-            {steeredActivations.length > 0 && (
-              <>
-                <div className="overflow-x-auto my-4">
-                  <SeqViewer
-                    seq={{
-                      tokens_acts_list: steeredActivations,
-                      tokens_list: sequenceToTokens(steeredSeq),
-                    }}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <div className="flex-grow flex items-center gap-4 w-full">
+                  <span className="whitespace-nowrap font-medium min-w-32 m-2">
+                    Steer multiplier: {steerMultiplier}
+                  </span>
+                  <Slider
+                    defaultValue={[1]}
+                    min={0}
+                    max={5}
+                    step={0.1}
+                    value={[steerMultiplier]}
+                    onValueChange={(value) => setSteerMultiplier(value[0])}
+                    className="flex-grow"
                   />
                 </div>
-                <CustomStructureViewer
-                  viewerId="steered-viewer"
-                  seq={steeredSeq}
-                  activations={steeredActivations}
-                  onLoad={onStructureLoad}
-                  requireActivations={false}
-                />
-              </>
-            )}
+
+                <div className="flex gap-2 flex-wrap justify-center">
+                  <Button variant="outline" size="sm" onClick={() => setSteerMultiplier(0)}>
+                    0x
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setSteerMultiplier(1)}>
+                    1x
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setSteerMultiplier(2)}>
+                    2x
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setSteerMultiplier(5)}>
+                    5x
+                  </Button>
+                </div>
+
+                {/* Steer button */}
+                <Button
+                  onClick={handleSteer}
+                  disabled={playgroundState === PlaygroundState.LOADING_STEERED_SEQUENCE}
+                  className="w-full sm:w-auto min-w-24"
+                >
+                  {playgroundState === PlaygroundState.LOADING_STEERED_SEQUENCE
+                    ? "Loading..."
+                    : "Steer"}
+                </Button>
+              </div>
+
+              {steeredActivations.length > 0 && (
+                <>
+                  <div className="overflow-x-auto my-4">
+                    <SeqViewer
+                      seq={{
+                        tokens_acts_list: steeredActivations,
+                        tokens_list: sequenceToTokens(steeredSeq),
+                      }}
+                    />
+                  </div>
+                  <CustomStructureViewer
+                    viewerId="steered-viewer"
+                    seq={steeredSeq}
+                    activations={steeredActivations}
+                    onLoad={onStructureLoad}
+                    requireActivations={false}
+                  />
+                </>
+              )}
+            </div>
           </div>
         )}
     </div>
