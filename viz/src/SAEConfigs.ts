@@ -26,9 +26,9 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         desc: "Activates on every 4th or 8th amino acid in free alpha helices",
       },
       {
-        name: "long alpha helices",
-        dim: 1008,
-        desc: "Activates on most amino acids in long alpha helices",
+        name: "long helix interspersed",
+        dim: 214,
+        desc: "Activates on interspersed residues in long helices, in the pattern 100100010010001...",
       },
       {
         name: "alpha helix turn",
@@ -51,6 +51,11 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         desc: "Activates on short beta strands in beta helices",
       },
       {
+        name: "long alpha helices",
+        dim: 1008,
+        desc: "Activates on most amino acids in long alpha helices",
+      },
+      {
         name: "disordered",
         dim: 2763,
         desc: "Activates on disordered regions containing K, A, and P residues",
@@ -59,6 +64,11 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         name: "leucine rich repeats",
         dim: 3425,
         desc: "Activates on the amino acid before the start of a beta sheet in a leucine rich repeat",
+      },
+      {
+        name: "helix bunch",
+        dim: 3055,
+        desc: "Activates on a bunch of alpha helices",
       },
       {
         name: "start M",
@@ -141,6 +151,11 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         name: "kinase beta strand",
         dim: 16,
         desc: "Activates on a beta strand in kinase domains",
+      },
+      {
+        name: "beta strand hammock",
+        dim: 179,
+        desc: "Activates on a beta strand and the disordered regions at each end",
       },
     ],
     defaultDim: 2293,
