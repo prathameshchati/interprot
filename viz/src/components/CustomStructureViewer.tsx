@@ -13,7 +13,6 @@ interface CustomStructureViewerProps {
   seq: string;
   activations: number[];
   onLoad?: () => void;
-  requireActivations?: boolean;
 }
 
 const CustomStructureViewer = ({
@@ -21,7 +20,6 @@ const CustomStructureViewer = ({
   seq,
   activations,
   onLoad,
-  requireActivations = true,
 }: CustomStructureViewerProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -177,13 +175,6 @@ const CustomStructureViewer = ({
       onLoad?.();
       return;
     }
-    if (requireActivations && activations.every((act) => act === 0)) {
-      setError(
-        "This feature did not activate on your sequence. Try a sequence more similar to ones below."
-      );
-      onLoad?.();
-      return;
-    }
     renderStructure().finally(() => {
       setIsLoading(false);
       onLoad?.();
@@ -195,7 +186,7 @@ const CustomStructureViewer = ({
         pluginRef.current = null;
       }
     };
-  }, [seq, activations, onLoad, viewerId, requireActivations]);
+  }, [seq, activations, onLoad, viewerId]);
 
   if (!seq || activations.length === 0) return null;
   if (isLoading) {

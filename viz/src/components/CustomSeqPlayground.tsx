@@ -173,12 +173,17 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
               }}
             />
           </div>
+          {customSeqActivations.every((act) => act === 0) && (
+            <p className="text-sm mb-2">
+              This feature did not activate on your sequence. Try a sequence more similar to the
+              ones below.
+            </p>
+          )}
           <CustomStructureViewer
             viewerId="custom-viewer"
             seq={submittedSeqRef.current}
             activations={customSeqActivations}
             onLoad={onStructureLoad}
-            requireActivations={true}
           />
         </>
       )}
@@ -283,7 +288,6 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
                     seq={steeredSeq}
                     activations={steeredActivations}
                     onLoad={onStructureLoad}
-                    requireActivations={false}
                   />
                 </>
               )}

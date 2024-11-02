@@ -21,24 +21,29 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
     plmLayer: 24,
     curated: [
       {
-        name: "free alpha helices",
+        name: "free alpha helix alternating",
         dim: 2293,
-        desc: "Activates on every 4th or 8th amino acid in free alpha helices",
+        desc: "This feature activates on interspersed amino acids in alpha helices that tend to be isolated from other structures. It seems to fire strongly in every other turn of the helix (and weakly on the other turns).",
+      },
+      {
+        name: "beta strand channel",
+        dim: 3883,
+        desc: "This feature activates on channel-like structures consisting of beta strands. It fires only on a subset of beta strands consisting of the channel and fires more strongly one side of the channel.",
+      },
+      {
+        name: "hugging helices",
+        dim: 3348,
+        desc: "Activates on the interfacing residues of bunched-together alpha helices. It does seem to understand the geometric orientation of the helices because it fires on 2 adjacent amino acids when the orientation is such that both those amino acids are facing the opposing helix.",
       },
       {
         name: "long helix interspersed",
         dim: 214,
-        desc: "Activates on interspersed residues in long helices, in the pattern 100100010010001...",
+        desc: "Activates on interspersed amino acids in long helices in the pattern 100100010010001..., which corresponds to every turn.",
       },
       {
         name: "alpha helix turn",
         dim: 56,
         desc: "Activates on the turn between two alpha helices in ABC transporter proteins",
-      },
-      {
-        name: "hugging helices",
-        dim: 3348,
-        desc: "Activates on the interfacing residues of bunched-together alpha helices",
       },
       {
         name: "single beta strand",
