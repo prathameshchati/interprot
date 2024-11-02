@@ -33,12 +33,12 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
       {
         name: "hugging helices",
         dim: 3348,
-        desc: "Activates on the interfacing residues of bunched-together alpha helices. It does seem to understand the geometric orientation of the helices because it fires on 2 adjacent amino acids when the orientation is such that both those amino acids are facing the opposing helix.",
+        desc: "This feature activates on the interfacing residues of bunched-together alpha helices. It does seem to understand the geometric orientation of the helices because it fires on 2 adjacent amino acids when the orientation is such that both those amino acids are facing the opposing helix.",
       },
       {
-        name: "long helix interspersed",
+        name: "long helix every turn",
         dim: 214,
-        desc: "Activates on interspersed amino acids in long helices in the pattern 100100010010001..., which corresponds to every turn.",
+        desc: "This feature activates on interspersed amino acids in long helices in the pattern 100100010010001..., which corresponds to every turn.",
       },
       {
         name: "alpha helix turn",
@@ -51,9 +51,14 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         desc: "Activates on a single beta strand",
       },
       {
+        name: "helix: first aa",
+        dim: 3451,
+        desc: "Activates on the first amino acid in a specific alpha helix",
+      },
+      {
         name: "beta strand: first aa",
         dim: 782,
-        desc: "Activates on the first amino acid in beta sheets",
+        desc: "Activates on the first amino acid in a specific beta strand",
       },
       {
         name: "beta helix",
@@ -73,7 +78,7 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
       {
         name: "leucine rich repeats",
         dim: 3425,
-        desc: "Activates on the amino acid before the start of a beta sheet in a leucine rich repeat",
+        desc: "Activates on the amino acid before the start of a beta strand in a leucine rich repeat",
       },
       {
         name: "helix bunch",
