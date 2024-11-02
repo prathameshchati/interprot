@@ -22,15 +22,15 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
     plmLayer: 24,
     curated: [
       {
-        name: "free alpha helix",
+        name: "full turn in alpha helix",
         dim: 2293,
-        desc: "This feature activates on interspersed amino acids in alpha helices that tend to be isolated from other structures. It alternates between firing strongly and weakly in each turn of the helix.",
+        desc: "This feature activates strongly on every 7th amino acid (approximately two full turns) in alpha helices.",
         group: "structural",
       },
       {
         name: "beta strand channel",
         dim: 3883,
-        desc: "This feature activates on channel-like structures consisting of beta strands. It fires only on a subset of beta strands making up the channel and more strongly one side of the channel.",
+        desc: "This feature activates on channel-like structures consisting of beta strands. It fires on a specific beta hairpin within the channel.",
         group: "structural",
       },
       {
