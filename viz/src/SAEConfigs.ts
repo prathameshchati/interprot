@@ -21,14 +21,14 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
     plmLayer: 24,
     curated: [
       {
-        name: "free alpha helix alternating",
+        name: "free alpha helix",
         dim: 2293,
-        desc: "This feature activates on interspersed amino acids in alpha helices that tend to be isolated from other structures. It fires strongly in every other turn of the helix (and weakly on the other turns).",
+        desc: "This feature activates on interspersed amino acids in alpha helices that tend to be isolated from other structures. It alternates between firing strongly and weakly in each turn of the helix.",
       },
       {
         name: "beta strand channel",
         dim: 3883,
-        desc: "This feature activates on channel-like structures consisting of beta strands. It fires only on a subset of beta strands consisting of the channel and fires more strongly one side of the channel.",
+        desc: "This feature activates on channel-like structures consisting of beta strands. It fires only on a subset of beta strands making up the channel and more strongly one side of the channel.",
       },
       {
         name: "hugging helices",
@@ -44,6 +44,11 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         name: "beta strand motif",
         dim: 88,
         desc: "This feature activates on a specific beta strand motif in ABC transporters. The highlighted beta strand is always the one that opposes an alpha helix.",
+      },
+      {
+        name: "perpendicular helix",
+        dim: 2320,
+        desc: "This feature activates on parts of alpha helices. The highlighted parts tend to be perpendicular to a nearby helix.",
       },
       {
         name: "single beta strand",
