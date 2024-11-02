@@ -30,7 +30,7 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
       {
         name: "beta strand channel",
         dim: 3883,
-        desc: "This feature activates on channel-like structures consisting of beta strands. It fires on a specific beta hairpin within the channel.",
+        desc: "This feature activates on channel-like structures consisting of beta strands. It fires on a specific beta strands within the channel.",
         group: "structural",
       },
       {
