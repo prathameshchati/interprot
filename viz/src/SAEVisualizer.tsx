@@ -158,7 +158,7 @@ function SAEVisualizer() {
         </div>
         <h1 className="text-3xl font-semibold md:mt-0 mt-16">Feature {selectedFeature}</h1>
         {dimToCuratedMap.has(selectedFeature) && (
-          <p className="mt-2">{dimToCuratedMap.get(selectedFeature)?.desc}</p>
+          <p className="mt-3">{dimToCuratedMap.get(selectedFeature)?.desc}</p>
         )}
         {config?.supportsCustomSequence && <CustomSeqPlayground feature={selectedFeature} />}
         <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg">

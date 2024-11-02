@@ -33,7 +33,7 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
       {
         name: "hugging helices",
         dim: 3348,
-        desc: "This feature activates on the interfacing residues of bunched-together alpha helices. It seems to understand the geometric orientation of the helices because it fires on either a single amino acid or 2 adjacent amino acids depending on the surface exposed to the opposing helix.",
+        desc: "This feature activates on the interfacing residues of bunched-together alpha helices. In addition to understanding the geometric orientation of the helices, it seems to also capture the concept of the binding interface because it fires on either a single amino acid or 2 adjacent amino acids depending on the surface exposed to the opposing helix.",
       },
       {
         name: "long helix every turn",
