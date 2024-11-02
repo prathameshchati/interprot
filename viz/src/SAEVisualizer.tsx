@@ -25,6 +25,8 @@ import HomeNavigator from "@/components/HomeNavigator";
 import "./App.css";
 import { Toggle } from "./components/ui/toggle";
 import { useParams, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Dices } from "lucide-react";
 
 const NUM_SEQS_TO_DISPLAY = 9;
 const SHOW_MODEL_SELECTOR = false;
@@ -158,6 +160,13 @@ function SAEVisualizer() {
               visualize its activation pattern.
             </p>
           </div>
+          <Button
+            variant="outline"
+            className="mb-3 mx-3"
+            onClick={() => handleFeatureChange(Math.floor(Math.random() * config.numHiddenDims))}
+          >
+            <Dices className="w-4 h-4 mr-2" /> Random Feature
+          </Button>
           <Separator />
         </SidebarHeader>
         <SidebarContent>
