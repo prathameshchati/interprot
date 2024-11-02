@@ -14,9 +14,7 @@ class TestSingleLatentProbe(unittest.TestCase):
         "interprot.logistic_regression_probe.single_latent.prepare_arrays_for_logistic_regression"
     )
     @patch("interprot.logistic_regression_probe.single_latent.torch.load")
-    @patch(
-        "interprot.logistic_regression_probe.single_latent.AutoTokenizer.from_pretrained"
-    )
+    @patch("interprot.logistic_regression_probe.single_latent.AutoTokenizer.from_pretrained")
     @patch("interprot.logistic_regression_probe.single_latent.EsmModel.from_pretrained")
     @patch("interprot.logistic_regression_probe.single_latent.SparseAutoencoder")
     def test_single_latent_e2e(

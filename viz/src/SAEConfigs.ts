@@ -42,7 +42,7 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
       {
         name: "kinase helix",
         dim: 594,
-        desc: "This feature activates strongly on a specific helix in kinase domains and weakly on surrounding beta strands. The highlighted helix is always opposing a beta sheet.",
+        desc: "This feature activates strongly on a specific helix in kinase domains and weakly on surrounding beta strands. The highlighted helix is always the one opposed to the beta sheet.",
         group: "structural",
       },
       {
