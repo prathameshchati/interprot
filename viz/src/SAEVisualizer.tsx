@@ -47,7 +47,7 @@ function FeatureList({ config, feature, setFeature }: FeatureListProps) {
   };
 
   const groupedFeatures = config.curated?.reduce((acc, feature) => {
-    const group = feature.group;
+    const group = feature.group || "not classified";
     if (!acc[group]) acc[group] = [];
     acc[group].push(feature);
     return acc;
