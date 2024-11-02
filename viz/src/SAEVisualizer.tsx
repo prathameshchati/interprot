@@ -22,7 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import HomeNavigator from "@/components/HomeNavigator";
 import "./App.css";
 import { Toggle } from "./components/ui/toggle";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const NUM_SEQS_TO_DISPLAY = 9;
 const SHOW_MODEL_SELECTOR = false;
@@ -73,35 +73,37 @@ function FeatureList({ config, feature, setFeature }: FeatureListProps) {
 }
 
 function SAEVisualizer() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { model, feature } = useParams();
+  const navigate = useNavigate();
 
   const [selectedModel, setSelectedModel] = useState(() => {
-    return searchParams.get("model") || "SAE4096-L24";
+    return model && SAE_CONFIGS[model] ? model : "SAE4096-L24";
   });
-  const config = SAE_CONFIGS[selectedModel];
-  const dimToCuratedMap = new Map(config.curated?.map((i) => [i.dim, i]));
+  const config = SAE_CONFIGS[selectedModel] || SAE_CONFIGS["SAE4096-L24"];
+  const dimToCuratedMap = new Map(config?.curated?.map((i) => [i.dim, i]) || []);
 
-  const [feature, setFeature] = useState(() => {
-    return parseInt(searchParams.get("feature") || config.defaultDim.toString(), 10);
+  const [selectedFeature, setSelectedFeature] = useState(() => {
+    return parseInt(feature || config.defaultDim?.toString(), 10);
   });
 
   useEffect(() => {
-    setSearchParams({
-      model: selectedModel,
-      feature: feature.toString(),
-    });
-  }, [config, feature, selectedModel, setSearchParams]);
+    navigate(`/${selectedModel}/${selectedFeature}`);
+  }, [selectedModel, selectedFeature, navigate]);
 
   const [featureData, setFeatureData] = useState<SingleSeq[]>([]);
 
   useEffect(() => {
-    const fileURL = `${config.baseUrl}${feature}.json`;
+    const fileURL = `${config.baseUrl}${selectedFeature}.json`;
     fetch(fileURL)
       .then((response) => response.json())
       .then((data) => {
         setFeatureData(data.slice(0, NUM_SEQS_TO_DISPLAY));
       });
-  }, [config, feature]);
+  }, [config, selectedFeature]);
+
+  const handleFeatureChange = (newFeature: number) => {
+    setSelectedFeature(newFeature);
+  };
 
   return (
     <SidebarProvider>
@@ -141,7 +143,7 @@ function SAEVisualizer() {
           <Separator />
         </SidebarHeader>
         <SidebarContent>
-          <FeatureList config={config} feature={feature} setFeature={setFeature} />
+          <FeatureList config={config} feature={selectedFeature} setFeature={handleFeatureChange} />
         </SidebarContent>
       </Sidebar>
       <main className="text-left max-w-full overflow-x-auto">
@@ -154,11 +156,11 @@ function SAEVisualizer() {
             <SidebarTrigger />
           </div>
         </div>
-        <h1 className="text-3xl font-semibold md:mt-0 mt-16">Feature {feature}</h1>
-        {dimToCuratedMap.has(feature) && (
-          <p className="mt-2">{dimToCuratedMap.get(feature)?.desc}</p>
+        <h1 className="text-3xl font-semibold md:mt-0 mt-16">Feature {selectedFeature}</h1>
+        {dimToCuratedMap.has(selectedFeature) && (
+          <p className="mt-2">{dimToCuratedMap.get(selectedFeature)?.desc}</p>
         )}
-        {config?.supportsCustomSequence && <CustomSeqPlayground feature={feature} />}
+        {config?.supportsCustomSequence && <CustomSeqPlayground feature={selectedFeature} />}
         <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg">
           <div className="overflow-x-auto">
             {featureData.map((seq) => (

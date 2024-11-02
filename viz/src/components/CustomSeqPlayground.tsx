@@ -187,7 +187,7 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
       {customSeqActivations.length > 0 &&
         playgroundState !== PlaygroundState.LOADING_SAE_ACTIVATIONS && (
           <div style={{ marginTop: 20 }}>
-            <h3 className="text-xl font-bold mb-4">Steering</h3>
+            <h3 className="text-xl font-bold mb-4">Sequence Editing via Steering</h3>
             <div className="bg-gray-50 p-4 rounded-lg mb-4">
               <p className="mb-2 text-sm">Steering increases this feature's activation.</p>
               <p className="mb-2 text-sm">

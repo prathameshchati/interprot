@@ -36,12 +36,17 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         desc: "Activates on the turn between two alpha helices in ABC transporter proteins",
       },
       {
-        name: "single beta sheet",
-        dim: 1299,
-        desc: "Activates on a single beta sheet",
+        name: "hugging helices",
+        dim: 3348,
+        desc: "Activates on the interfacing residues of bunched-together alpha helices",
       },
       {
-        name: "beta sheet: first aa",
+        name: "single beta strand",
+        dim: 1299,
+        desc: "Activates on a single beta strand",
+      },
+      {
+        name: "beta strand: first aa",
         dim: 782,
         desc: "Activates on the first amino acid in beta sheets",
       },
