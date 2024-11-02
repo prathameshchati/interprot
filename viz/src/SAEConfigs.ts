@@ -23,7 +23,7 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
       {
         name: "free alpha helix alternating",
         dim: 2293,
-        desc: "This feature activates on interspersed amino acids in alpha helices that tend to be isolated from other structures. It seems to fire strongly in every other turn of the helix (and weakly on the other turns).",
+        desc: "This feature activates on interspersed amino acids in alpha helices that tend to be isolated from other structures. It fires strongly in every other turn of the helix (and weakly on the other turns).",
       },
       {
         name: "beta strand channel",
@@ -33,7 +33,7 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
       {
         name: "hugging helices",
         dim: 3348,
-        desc: "This feature activates on the interfacing residues of bunched-together alpha helices. It does seem to understand the geometric orientation of the helices because it fires on 2 adjacent amino acids when the orientation is such that both those amino acids are facing the opposing helix.",
+        desc: "This feature activates on the interfacing residues of bunched-together alpha helices. It seems to understand the geometric orientation of the helices because it fires on either a single amino acid or 2 adjacent amino acids depending on the surface exposed to the opposing helix.",
       },
       {
         name: "long helix every turn",
@@ -41,9 +41,9 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         desc: "This feature activates on interspersed amino acids in long helices in the pattern 100100010010001..., which corresponds to every turn.",
       },
       {
-        name: "alpha helix turn",
-        dim: 56,
-        desc: "Activates on the turn between two alpha helices in ABC transporter proteins",
+        name: "beta strand motif",
+        dim: 88,
+        desc: "This feature activates on a specific beta strand motif in ABC transporters. The highlighted beta strand is always the one that opposes an alpha helix.",
       },
       {
         name: "single beta strand",
@@ -64,6 +64,11 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         name: "beta helix",
         dim: 250,
         desc: "Activates on short beta strands in beta helices",
+      },
+      {
+        name: "alpha helix turn",
+        dim: 56,
+        desc: "Activates on the turn between two alpha helices in ABC transporter proteins",
       },
       {
         name: "long alpha helices",
