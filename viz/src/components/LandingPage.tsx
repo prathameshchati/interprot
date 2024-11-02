@@ -30,7 +30,7 @@ const LandingPage: React.FC = () => {
                   <X />
                 </button>
                 <Link
-                  to="/sae-visualizer"
+                  to="/sae-viz"
                   className="text-2xl text-gray-600 hover:text-gray-900"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -61,7 +61,7 @@ const LandingPage: React.FC = () => {
           </div>
         ) : (
           <nav className="space-x-4 flex">
-            <Link to="/sae-visualizer" className="text-gray-600 hover:text-gray-900">
+            <Link to="/sae-viz" className="text-gray-600 hover:text-gray-900">
               Visualizer
             </Link>
             <Link
@@ -109,7 +109,7 @@ const LandingPage: React.FC = () => {
           soon!
         </p>
         <Link
-          to="/sae-visualizer"
+          to="/sae-viz"
           className="bg-black text-white px-6 py-3 rounded-full text-lg inline-block order-2 sm:order-none mb-8 w-full sm:w-auto text-center"
         >
           SAE Visualizer

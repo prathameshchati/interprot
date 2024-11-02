@@ -107,7 +107,7 @@ function SAEVisualizer() {
   });
 
   useEffect(() => {
-    navigate(`/${selectedModel}/${selectedFeature}`);
+    navigate(`/sae-viz/${selectedModel}/${selectedFeature}`);
   }, [selectedModel, selectedFeature, navigate]);
 
   const [featureData, setFeatureData] = useState<SingleSeq[]>([]);
@@ -195,7 +195,6 @@ function SAEVisualizer() {
             ))}
           </div>
         </div>
-
         <MolstarMulti proteins={featureData} />
       </main>
     </SidebarProvider>

@@ -10,7 +10,7 @@ const router = createHashRouter([
     element: <LandingPage />,
   },
   {
-    path: "/:model/:feature?",
+    path: "/sae-viz/:model?/:feature?",
     element: <SAEVisualizer />,
   },
 ]);
