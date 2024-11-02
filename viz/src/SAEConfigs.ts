@@ -40,6 +40,18 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         group: "structural",
       },
       {
+        name: "kinase helix",
+        dim: 594,
+        desc: "This feature activates strongly on a specific helix in kinase domains and weakly on surrounding beta strands. The highlighted helix is always opposing a beta sheet.",
+        group: "structural",
+      },
+      {
+        name: "kinase beta mids",
+        dim: 294,
+        desc: "Activates on the middle residues in the beta sheet in kinase domains. It fires most strongly on the second outer beta strand and doesn't fire on the outermost beta strand at all.",
+        group: "structural",
+      },
+      {
         name: "long helix every turn",
         dim: 214,
         desc: "This feature activates on interspersed amino acids in long helices in the pattern 100100010010001..., which corresponds to every turn.",
@@ -214,21 +226,9 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         group: "amino acid identity",
       },
       {
-        name: "kinase helix",
-        dim: 594,
-        desc: "Activates strongly on the C-helix in kinase domains and weakly on surrounding beta strands",
-        group: "structural",
-      },
-      {
         name: "kinase beta strands",
         dim: 3642,
         desc: "Activates on some beta strands in kinase domains and weakly on the C-helix",
-        group: "structural",
-      },
-      {
-        name: "kinase beta mids",
-        dim: 294,
-        desc: "Activates on the middle residues in kinase domain beta strands",
         group: "structural",
       },
       {
