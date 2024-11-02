@@ -17,6 +17,8 @@ import {
   SidebarHeader,
   SidebarTrigger,
   useSidebar,
+  SidebarGroup,
+  SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import HomeNavigator from "@/components/HomeNavigator";
@@ -44,30 +46,46 @@ function FeatureList({ config, feature, setFeature }: FeatureListProps) {
     setOpenMobile(false);
   };
 
+  const groupedFeatures = config.curated?.reduce((acc, feature) => {
+    const group = feature.group;
+    if (!acc[group]) acc[group] = [];
+    acc[group].push(feature);
+    return acc;
+  }, {} as Record<string, CuratedFeature[]>);
+
   return (
     <ul className="space-y-2 font-medium">
-      {config.curated?.map((c) => (
-        <Toggle
-          key={`feature-${c.dim}`}
-          style={{ width: "100%", paddingLeft: 20, textAlign: "left" }}
-          className="justify-start"
-          pressed={feature === c.dim}
-          onPressedChange={() => handleFeatureChange(c.dim)}
-        >
-          {c.name}
-        </Toggle>
-      ))}
-      {Array.from({ length: config.numHiddenDims }, (_, i) => i).map((i) => (
-        <Toggle
-          key={`feature-${i}`}
-          style={{ width: "100%", paddingLeft: 20 }}
-          className="justify-start"
-          pressed={feature === i}
-          onPressedChange={() => handleFeatureChange(i)}
-        >
-          {i}
-        </Toggle>
-      ))}
+      {groupedFeatures &&
+        Object.entries(groupedFeatures).map(([group, features]) => (
+          <SidebarGroup key={group}>
+            <SidebarGroupLabel>{group}</SidebarGroupLabel>
+            {features.map((c) => (
+              <Toggle
+                key={`feature-${c.dim}`}
+                style={{ width: "100%", paddingLeft: 20, textAlign: "left" }}
+                className="justify-start"
+                pressed={feature === c.dim}
+                onPressedChange={() => handleFeatureChange(c.dim)}
+              >
+                {c.name}
+              </Toggle>
+            ))}
+          </SidebarGroup>
+        ))}
+      <SidebarGroup>
+        <SidebarGroupLabel>all features</SidebarGroupLabel>
+        {Array.from({ length: config.numHiddenDims }, (_, i) => i).map((i) => (
+          <Toggle
+            key={`feature-${i}`}
+            style={{ width: "100%", paddingLeft: 20 }}
+            className="justify-start"
+            pressed={feature === i}
+            onPressedChange={() => handleFeatureChange(i)}
+          >
+            {i}
+          </Toggle>
+        ))}
+      </SidebarGroup>
     </ul>
   );
 }
