@@ -34,13 +34,17 @@ const SHOW_MODEL_SELECTOR = false;
 interface FeatureListProps {
   config: {
     curated?: CuratedFeature[];
+    plmLayer: number;
     numHiddenDims: number;
+    supportsCustomSequence?: boolean;
   };
+  model: string;
+  setModel: (model: string) => void;
   feature: number;
   setFeature: (feature: number) => void;
 }
 
-function FeatureList({ config, feature, setFeature }: FeatureListProps) {
+function FeatureSidebar({ config, model, setModel, feature, setFeature }: FeatureListProps) {
   const { setOpenMobile } = useSidebar();
 
   const handleFeatureChange = (feature: number) => {
@@ -56,39 +60,86 @@ function FeatureList({ config, feature, setFeature }: FeatureListProps) {
   }, {} as Record<string, CuratedFeature[]>);
 
   return (
-    <ul className="space-y-2 font-medium">
-      {groupedFeatures &&
-        Object.entries(groupedFeatures).map(([group, features]) => (
-          <SidebarGroup key={group}>
-            <SidebarGroupLabel>{group}</SidebarGroupLabel>
-            {features.map((c) => (
+    <Sidebar>
+      <SidebarHeader>
+        <div className="m-3">
+          <HomeNavigator />
+        </div>
+        {SHOW_MODEL_SELECTOR && (
+          <Select value={model} onValueChange={(value) => setModel(value)}>
+            <SelectTrigger className="mb-3">
+              <SelectValue placeholder="Select SAE Model" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.keys(SAE_CONFIGS).map((model) => (
+                <SelectItem key={model} value={model}>
+                  {model}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        <div className="text-sm text-left px-3 mb-2">
+          <p>
+            This{" "}
+            <a href="https://huggingface.co/liambai/InterProt-ESM2-SAEs" className="underline">
+              SAE
+            </a>{" "}
+            was trained on layer {config.plmLayer} of{" "}
+            <a href="https://huggingface.co/facebook/esm2_t33_650M_UR50D" className="underline">
+              ESM2-650M
+            </a>{" "}
+            and has {config.numHiddenDims} hidden dimensions. Click on a feature below to visualize
+            its activation pattern.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          className="mb-3 mx-3"
+          onClick={() => {
+            handleFeatureChange(Math.floor(Math.random() * config.numHiddenDims));
+          }}
+        >
+          <Dices className="w-4 h-4 mr-2" /> Random Feature
+        </Button>
+        <Separator />
+      </SidebarHeader>
+      <SidebarContent>
+        <ul className="space-y-2 font-medium">
+          {groupedFeatures &&
+            Object.entries(groupedFeatures).map(([group, features]) => (
+              <SidebarGroup key={group}>
+                <SidebarGroupLabel>{group}</SidebarGroupLabel>
+                {features.map((c) => (
+                  <Toggle
+                    key={`feature-${c.dim}`}
+                    style={{ width: "100%", paddingLeft: 20, textAlign: "left" }}
+                    className="justify-start"
+                    pressed={feature === c.dim}
+                    onPressedChange={() => handleFeatureChange(c.dim)}
+                  >
+                    {c.name}
+                  </Toggle>
+                ))}
+              </SidebarGroup>
+            ))}
+          <SidebarGroup>
+            <SidebarGroupLabel>all features</SidebarGroupLabel>
+            {Array.from({ length: config.numHiddenDims }, (_, i) => i).map((i) => (
               <Toggle
-                key={`feature-${c.dim}`}
-                style={{ width: "100%", paddingLeft: 20, textAlign: "left" }}
+                key={`feature-${i}`}
+                style={{ width: "100%", paddingLeft: 20 }}
                 className="justify-start"
-                pressed={feature === c.dim}
-                onPressedChange={() => handleFeatureChange(c.dim)}
+                pressed={feature === i}
+                onPressedChange={() => handleFeatureChange(i)}
               >
-                {c.name}
+                {i}
               </Toggle>
             ))}
           </SidebarGroup>
-        ))}
-      <SidebarGroup>
-        <SidebarGroupLabel>all features</SidebarGroupLabel>
-        {Array.from({ length: config.numHiddenDims }, (_, i) => i).map((i) => (
-          <Toggle
-            key={`feature-${i}`}
-            style={{ width: "100%", paddingLeft: 20 }}
-            className="justify-start"
-            pressed={feature === i}
-            onPressedChange={() => handleFeatureChange(i)}
-          >
-            {i}
-          </Toggle>
-        ))}
-      </SidebarGroup>
-    </ul>
+        </ul>
+      </SidebarContent>
+    </Sidebar>
   );
 }
 
@@ -121,58 +172,15 @@ function SAEVisualizer() {
       });
   }, [config, selectedFeature]);
 
-  const handleFeatureChange = (newFeature: number) => {
-    setSelectedFeature(newFeature);
-  };
-
   return (
     <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader>
-          <div className="m-3">
-            <HomeNavigator />
-          </div>
-          {SHOW_MODEL_SELECTOR && (
-            <Select value={selectedModel} onValueChange={(value) => setSelectedModel(value)}>
-              <SelectTrigger className="mb-3">
-                <SelectValue placeholder="Select SAE Model" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.keys(SAE_CONFIGS).map((model) => (
-                  <SelectItem key={model} value={model}>
-                    {model}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          <div className="text-sm text-left px-3 mb-2">
-            <p>
-              This{" "}
-              <a href="https://huggingface.co/liambai/InterProt-ESM2-SAEs" className="underline">
-                SAE
-              </a>{" "}
-              was trained on layer {config.plmLayer} of{" "}
-              <a href="https://huggingface.co/facebook/esm2_t33_650M_UR50D" className="underline">
-                ESM2-650M
-              </a>{" "}
-              and has {config.numHiddenDims} hidden dimensions. Click on a feature below to
-              visualize its activation pattern.
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            className="mb-3 mx-3"
-            onClick={() => handleFeatureChange(Math.floor(Math.random() * config.numHiddenDims))}
-          >
-            <Dices className="w-4 h-4 mr-2" /> Random Feature
-          </Button>
-          <Separator />
-        </SidebarHeader>
-        <SidebarContent>
-          <FeatureList config={config} feature={selectedFeature} setFeature={handleFeatureChange} />
-        </SidebarContent>
-      </Sidebar>
+      <FeatureSidebar
+        config={config}
+        model={selectedModel}
+        setModel={setSelectedModel}
+        feature={selectedFeature}
+        setFeature={setSelectedFeature}
+      />
       <main className="text-left max-w-full overflow-x-auto">
         {/* HACK to make the divider extend the entire width of the screen */}
         <div
